@@ -38,19 +38,23 @@ public class CallManager {
         mCounterMap = Collections.synchronizedMap(new HashMap<String, RequestCounter>());
     }
 
-    public void enqueue(String presenterName, String tag, Call call, Callback callback) {
+    public void enqueue(Call call, Callback callback) {
+        enqueue(null,call,callback);
+    }
+
+    public void enqueue(String tag, Call call, Callback callback) {
         synchronized (CallManager.class) {
 
             if (mCallMap.get(tag) == null) {
                 mCallMap.put(tag, call);
-                if (!mCounterMap.containsKey(presenterName)) {
-                    mCounterMap.put(presenterName, new RequestCounter());
+                if (!mCounterMap.containsKey(tag)) {
+                    mCounterMap.put(tag, new RequestCounter());
                 }
 
-                mCounterMap.get(presenterName).increase();
-
-                call.enqueue(callback);
+                mCounterMap.get(tag).increase();
             }
+
+            call.enqueue(callback);
 
             showCallInMap();
         }
