@@ -38,21 +38,20 @@ public class CallManager {
         mCounterMap = Collections.synchronizedMap(new HashMap<String, RequestCounter>());
     }
 
-    public void enqueue(Call call, Callback callback) {
-        enqueue(null, call, callback);
-    }
-
     public void enqueue(String tag, Call call, Callback callback) {
         synchronized (CallManager.class) {
 
-            if (mCallMap.get(tag) == null) {
-                mCallMap.put(tag, call);
-                if (!mCounterMap.containsKey(tag)) {
-                    mCounterMap.put(tag, new RequestCounter());
-                }
+            if (!(tag == null || tag.length() == 0)) {
+                if (mCallMap.get(tag) == null) {
+                    mCallMap.put(tag, call);
+                    if (!mCounterMap.containsKey(tag)) {
+                        mCounterMap.put(tag, new RequestCounter());
+                    }
 
-                mCounterMap.get(tag).increase();
+                    mCounterMap.get(tag).increase();
+                }
             }
+
 
             call.enqueue(callback);
 
@@ -84,7 +83,6 @@ public class CallManager {
                 mCallMap.get(tag).cancel();
                 dequeue(tag);
             }
-
         }
     }
 

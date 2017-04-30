@@ -89,6 +89,10 @@ public class RetrofitConf {
         mWebserviceMap.put(webservice, baseUrl);
     }
 
+    public String getBaseUrl(Class<?> webservice) {
+        return mWebserviceMap.get(webservice);
+    }
+
     public static class Builder {
 
         private Context _Context;
@@ -113,5 +117,28 @@ public class RetrofitConf {
             return this;
         }
 
+        public Builder timeout(long timeout) {
+            _RetrofitConf.setTimeout(timeout);
+            return this;
+        }
+
+        public Builder setUsingSSL(boolean isUsingSSL) {
+            if (isUsingSSL) {
+                _RetrofitConf.enableSSLConnection();
+            } else {
+                _RetrofitConf.disableSSLConnection();
+            }
+            return this;
+        }
+
+        public Builder setCookieHandler(CookieHandler cookieHandler) {
+            _RetrofitConf.setCookieHandler(cookieHandler);
+            return this;
+        }
+
+        public Builder setCertPins(String[] pins) {
+            _RetrofitConf.setCertPins(pins);
+            return this;
+        }
     }
 }

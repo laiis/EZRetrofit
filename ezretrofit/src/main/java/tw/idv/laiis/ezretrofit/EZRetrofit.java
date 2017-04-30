@@ -1,8 +1,12 @@
 package tw.idv.laiis.ezretrofit;
 
+import java.util.concurrent.TimeUnit;
+
+import okhttp3.OkHttpClient;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Retrofit;
+import retrofit2.converter.gson.GsonConverterFactory;
 import tw.idv.laiis.ezretrofit.managers.CallManager;
 
 /**
@@ -11,15 +15,15 @@ import tw.idv.laiis.ezretrofit.managers.CallManager;
 
 public class EZRetrofit {
 
-    private static volatile EZHelper sEZHelper;
+    private static volatile EZHelper sEZHelper = new EZHelper();
     private static volatile RetrofitConf sRetrofitConf;
 
     private EZRetrofit() {
-        sEZHelper = new EZHelper();
+
     }
 
     public static <T> EZRetrofitHelper create(Class<T> clsWebservice) {
-        EZRetrofitHelper helper = new EZRetrofitHelper();
+        EZRetrofitHelper helper = new EZRetrofitHelper(sRetrofitConf);
         helper.setWebservice(clsWebservice);
         sEZHelper.setEZRetrofitHelper(helper);
         return helper;
@@ -32,15 +36,23 @@ public class EZRetrofit {
     }
 
     public static void count(Object obj, Call call) {
-        CallManager.newInstance().enqueue(obj.getClass().getName(), call, sEZHelper.getEZRetrofitHelper()._Callback);
+        String tag = "";
+        if (obj != null) {
+            tag = obj.getClass().getName();
+        }
+        CallManager.newInstance().enqueue(tag, call, sEZHelper.getEZRetrofitHelper()._Callback);
     }
 
     public static void call(Call call) {
-        call.enqueue(sEZHelper.getEZRetrofitHelper()._Callback);
+        count(null, call);
     }
 
-    public static void stop(Object obj){
+    public static void stop(Object obj) {
         CallManager.newInstance().cancel(obj.getClass().getName());
+    }
+
+    public static void stopAll() {
+        CallManager.newInstance().cancelAll();
     }
 
     public static class EZHelper {
@@ -58,11 +70,11 @@ public class EZRetrofit {
     public static class EZRetrofitHelper<T> {
 
         private Class<T> _ClsWebservice;
-        private T mT;
         private Callback _Callback;
+        private RetrofitConf _RetrofitConf;
 
-        public EZRetrofitHelper() {
-
+        public EZRetrofitHelper(RetrofitConf conf) {
+            this._RetrofitConf = conf;
         }
 
         public EZRetrofitHelper setWebservice(Class<T> clsWebservice) {
@@ -70,18 +82,19 @@ public class EZRetrofit {
             return this;
         }
 
-        private EZRetrofitHelper setConcreteWebservice(T t) {
-            this.mT = t;
-            return this;
-        }
-
-        public EZRetrofitHelper endPoint(String endPoint) {
-            return this;
-        }
-
         public T callback(Callback callback) {
+            this._Callback = callback;
+
             Retrofit retrofit = null;
-            return (retrofit.create(_ClsWebservice));
+            OkHttpClient client = new OkHttpClient.Builder()
+                    .connectTimeout(_RetrofitConf.getTimeout(), TimeUnit.SECONDS)
+                    .build();
+            retrofit = new Retrofit.Builder()
+                    .baseUrl(_RetrofitConf.getBaseUrl(_ClsWebservice))
+                    .addConverterFactory(GsonConverterFactory.create())
+                    .client(client)
+                    .build();
+            return retrofit.create(_ClsWebservice);
         }
     }
 }
