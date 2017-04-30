@@ -85,17 +85,33 @@ public class RetrofitConf {
         return mCertificatePinner;
     }
 
+    public void addBaseUrlService(Class<?> webservice, String baseUrl) {
+        mWebserviceMap.put(webservice, baseUrl);
+    }
+
     public static class Builder {
 
         private Context _Context;
+        private RetrofitConf _RetrofitConf;
 
         public Builder(Context context) {
             this._Context = context;
+            this._RetrofitConf = new RetrofitConf(_Context);
         }
 
         public RetrofitConf build() {
-            RetrofitConf retrofitConf = new RetrofitConf(_Context);
-            return retrofitConf;
+            return _RetrofitConf;
         }
+
+        public Builder setCertificatePinner(CertificatePinner pinner) {
+            _RetrofitConf.setCertificatePinner(pinner);
+            return this;
+        }
+
+        public Builder baseUrls(Class<?> webservice, String baseUrl) {
+            _RetrofitConf.addBaseUrlService(webservice, baseUrl);
+            return this;
+        }
+
     }
 }

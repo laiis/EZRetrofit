@@ -39,7 +39,7 @@ public class CallManager {
     }
 
     public void enqueue(Call call, Callback callback) {
-        enqueue(null,call,callback);
+        enqueue(null, call, callback);
     }
 
     public void enqueue(String tag, Call call, Callback callback) {
@@ -60,16 +60,16 @@ public class CallManager {
         }
     }
 
-    public void dequeue(String presenterName, String tag) {
+    public void dequeue(String tag) {
         synchronized (CallManager.class) {
 
             mCallMap.remove(tag);
 
-            if (mCounterMap.containsKey(presenterName)) {
-                mCounterMap.get(presenterName).decrease();
+            if (mCounterMap.containsKey(tag)) {
+                mCounterMap.get(tag).decrease();
 
-                if (mCounterMap.get(presenterName).isZero()) {
-                    mCounterMap.remove(presenterName);
+                if (mCounterMap.get(tag).isZero()) {
+                    mCounterMap.remove(tag);
                 }
             }
 
@@ -78,11 +78,11 @@ public class CallManager {
         }
     }
 
-    public void cancel(String presenterName, String tag) {
+    public void cancel(String tag) {
         synchronized (CallManager.class) {
             if (mCallMap.get(tag) != null) {
                 mCallMap.get(tag).cancel();
-                dequeue(presenterName, tag);
+                dequeue(tag);
             }
 
         }

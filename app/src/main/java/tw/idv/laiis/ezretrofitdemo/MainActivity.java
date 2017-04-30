@@ -75,7 +75,7 @@ public class MainActivity extends AppCompatActivity {
                         })))
                         .getTestData());
 
-        EZretrofit.create(JsonWebservice.class) // build EZRetrofitHelper
+        EZRetrofit.create(JsonWebservice.class) // build EZRetrofitHelper
                 .endPoint(endPoint, var1, var2)
                 .count(this)
                 .upload(query, new TemplateCallback() {

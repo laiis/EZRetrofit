@@ -12,6 +12,7 @@ import tw.idv.laiis.ezretrofit.managers.CallManager;
 public class EZRetrofit {
 
     private static volatile EZHelper sEZHelper;
+    private static volatile RetrofitConf sRetrofitConf;
 
     private EZRetrofit() {
         sEZHelper = new EZHelper();
@@ -24,12 +25,22 @@ public class EZRetrofit {
         return helper;
     }
 
+    public static void initial(RetrofitConf retrofitConf) {
+        synchronized (EZRetrofit.class) {
+            sRetrofitConf = retrofitConf;
+        }
+    }
+
     public static void count(Object obj, Call call) {
-        CallManager.newInstance().enqueue(obj, call, sEZHelper.getEZRetrofitHelper()._Callback);
+        CallManager.newInstance().enqueue(obj.getClass().getName(), call, sEZHelper.getEZRetrofitHelper()._Callback);
     }
 
     public static void call(Call call) {
         call.enqueue(sEZHelper.getEZRetrofitHelper()._Callback);
+    }
+
+    public static void stop(Object obj){
+        CallManager.newInstance().cancel(obj.getClass().getName());
     }
 
     public static class EZHelper {
