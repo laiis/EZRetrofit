@@ -1,4 +1,4 @@
-package tw.idv.laiis.ezretrofit;
+package tw.idv.laiis.ezretrofitdemo;
 
 import okhttp3.ResponseBody;
 import retrofit2.Call;

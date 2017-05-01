@@ -5,7 +5,6 @@ import android.app.Application;
 import java.net.CookieManager;
 
 import tw.idv.laiis.ezretrofit.EZRetrofit;
-import tw.idv.laiis.ezretrofit.JsonWebservice;
 import tw.idv.laiis.ezretrofit.RetrofitConf;
 
 /**
