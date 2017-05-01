@@ -26,7 +26,6 @@ public class RetrofitConf {
     private CookieHandler mCookieHandler;
     private List<Interceptor> mInterceptorList;
     private CertificatePinner mCertificatePinner;
-    private String mProtocol; // i.e : TLS ...
     private List<String> mEndPointList;
     private boolean isUseSecureRandom;
     private Map<Class<?>, String> mWebserviceMap;
@@ -100,6 +99,14 @@ public class RetrofitConf {
         return mProtocolList;
     }
 
+    public void setInterceptors(List<Interceptor> interceptorList) {
+        this.mInterceptorList.addAll(interceptorList);
+    }
+
+    public List<Interceptor> getInterceptorList() {
+        return mInterceptorList;
+    }
+
     public static class Builder {
 
         private Context _Context;
@@ -150,6 +157,11 @@ public class RetrofitConf {
 
         public Builder setProtocols(List<Protocol> protocolList) {
             _RetrofitConf.setProtocols(protocolList);
+            return this;
+        }
+
+        public Builder setInterceptors(List<Interceptor> interceptorList) {
+            _RetrofitConf.setInterceptors(interceptorList);
             return this;
         }
     }

@@ -3,6 +3,7 @@ package tw.idv.laiis.ezretrofit;
 import java.util.concurrent.TimeUnit;
 
 import okhttp3.ConnectionPool;
+import okhttp3.Interceptor;
 import okhttp3.JavaNetCookieJar;
 import okhttp3.OkHttpClient;
 import retrofit2.Call;
@@ -47,6 +48,12 @@ public class EZRetrofit<T> {
 
             if (sRetrofitConf.getProtocols() != null && sRetrofitConf.getProtocols().size() > 0) {
                 builder.protocols(sRetrofitConf.getProtocols());
+            }
+
+            if (sRetrofitConf.getInterceptorList() != null && sRetrofitConf.getInterceptorList().size() > 0) {
+                for (Interceptor interceptor : sRetrofitConf.getInterceptorList()) {
+                    builder.addInterceptor(interceptor);
+                }
             }
 
             client = builder.build();
