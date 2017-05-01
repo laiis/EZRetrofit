@@ -13,15 +13,22 @@ import tw.idv.laiis.ezretrofit.RetrofitConf;
 
 public class EZRetrofitApp extends Application {
 
+    private static volatile EZRetrofitApp sEZRetrofitApp;
+
+    private static EZRetrofitApp getEZRetrofitApp() {
+        return sEZRetrofitApp;
+    }
+
     @Override
     public void onCreate() {
         super.onCreate();
+        sEZRetrofitApp = this;
         initialEZRetrofit();
     }
 
-    private void initialEZRetrofit() {
+    public static void initialEZRetrofit() {
         // I want to use this pattern to call api.
-        EZRetrofit.initial(new RetrofitConf.Builder(this)
+        EZRetrofit.initial(new RetrofitConf.Builder(getEZRetrofitApp())
                 .setCookieHandler(CookieManager.getDefault())
                 .timeout(15L)
                 .baseUrls(JsonWebservice.class, "http://data.taipei/")
