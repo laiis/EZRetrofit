@@ -11,16 +11,13 @@ import java.util.Map;
 
 import okhttp3.CertificatePinner;
 import okhttp3.Interceptor;
+import okhttp3.Protocol;
 
 /**
  * Created by laiis on 2017/4/27.
  */
 
 public class RetrofitConf {
-
-    public enum RetrofitType {
-        JSON, XML
-    }
 
     private Context mContext;
     private boolean isUseSSL;
@@ -33,12 +30,14 @@ public class RetrofitConf {
     private List<String> mEndPointList;
     private boolean isUseSecureRandom;
     private Map<Class<?>, String> mWebserviceMap;
+    private List<Protocol> mProtocolList;
 
     private RetrofitConf(Context context) {
         this.mContext = context;
         this.mEndPointList = Collections.synchronizedList(new ArrayList<String>());
         this.mInterceptorList = Collections.synchronizedList(new ArrayList<Interceptor>());
         this.mWebserviceMap = Collections.synchronizedMap(new HashMap<Class<?>, String>());
+        this.mProtocolList = Collections.synchronizedList(new ArrayList<Protocol>());
     }
 
     public void setCookieHandler(CookieHandler cookieHandler) {
@@ -93,6 +92,14 @@ public class RetrofitConf {
         return mWebserviceMap.get(webservice);
     }
 
+    public void setProtocols(List<Protocol> protocolList) {
+        mProtocolList.addAll(protocolList);
+    }
+
+    public List<Protocol> getProtocols() {
+        return mProtocolList;
+    }
+
     public static class Builder {
 
         private Context _Context;
@@ -138,6 +145,11 @@ public class RetrofitConf {
 
         public Builder setCertPins(String[] pins) {
             _RetrofitConf.setCertPins(pins);
+            return this;
+        }
+
+        public Builder setProtocols(List<Protocol> protocolList) {
+            _RetrofitConf.setProtocols(protocolList);
             return this;
         }
     }
