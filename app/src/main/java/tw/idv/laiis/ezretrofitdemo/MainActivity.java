@@ -12,7 +12,6 @@ import okhttp3.ResponseBody;
 import retrofit2.Call;
 import retrofit2.Response;
 import tw.idv.laiis.ezretrofit.EZRetrofit;
-import tw.idv.laiis.ezretrofit.JsonWebservice;
 import tw.idv.laiis.ezretrofit.TemplateCallback;
 
 public class MainActivity extends AppCompatActivity {
