@@ -1,5 +1,8 @@
 package tw.idv.laiis.ezretrofit;
 
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
 import okhttp3.ConnectionPool;
@@ -17,8 +20,9 @@ import tw.idv.laiis.ezretrofit.managers.CallManager;
 
 public class EZRetrofit<T> {
 
+    private static volatile Map<Class<?>, Retrofit> sRetrofitMap = Collections.synchronizedMap(new HashMap<Class<?>, Retrofit>());
     private static volatile RetrofitConf sRetrofitConf;
-    private static Retrofit.Builder sBuilder;
+    private static volatile Retrofit.Builder sBuilder;
 
     private EZRetrofit() {
 
@@ -26,6 +30,7 @@ public class EZRetrofit<T> {
 
     public static void initial(RetrofitConf retrofitConf) {
         synchronized (EZRetrofit.class) {
+            sRetrofitMap.clear();
             sRetrofitConf = retrofitConf;
 
             OkHttpClient client = null;
@@ -116,8 +121,15 @@ public class EZRetrofit<T> {
         }
 
         public T webservice(Class<T> clsWebservice) {
-            Retrofit retrofit = sBuilder.baseUrl(_RetrofitConf.getBaseUrl(clsWebservice))
-                    .build();
+            if (sRetrofitMap.get(clsWebservice) == null) {
+                Retrofit retrofit = sBuilder.baseUrl(_RetrofitConf.getBaseUrl(clsWebservice))
+                        .build();
+
+                sRetrofitMap.put(clsWebservice, retrofit);
+            }
+
+            Retrofit retrofit = sRetrofitMap.get(clsWebservice);
+
             return retrofit.create(clsWebservice);
         }
 
