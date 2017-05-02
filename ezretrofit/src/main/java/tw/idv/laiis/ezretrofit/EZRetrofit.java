@@ -1,5 +1,7 @@
 package tw.idv.laiis.ezretrofit;
 
+import android.support.annotation.NonNull;
+
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
@@ -20,6 +22,7 @@ import tw.idv.laiis.ezretrofit.managers.CallManager;
 
 public class EZRetrofit<T> {
 
+    @NonNull
     private static volatile Map<Class<?>, Retrofit> sRetrofitMap = Collections.synchronizedMap(new HashMap<Class<?>, Retrofit>());
     private static volatile RetrofitConf sRetrofitConf;
     private static volatile Retrofit.Builder sBuilder;
@@ -28,6 +31,7 @@ public class EZRetrofit<T> {
 
     }
 
+    @NonNull
     public static void initial(RetrofitConf retrofitConf) {
         synchronized (EZRetrofit.class) {
             sRetrofitMap.clear();
@@ -37,9 +41,14 @@ public class EZRetrofit<T> {
             OkHttpClient.Builder builder = new OkHttpClient.Builder();
             if (sRetrofitConf.getTimeout() > 0L) {
                 builder.connectTimeout(retrofitConf.getTimeout(), TimeUnit.SECONDS);
+                builder.readTimeout(retrofitConf.getTimeout(), TimeUnit.SECONDS);
             }
 
-            if (sRetrofitConf.getCertficatePinner() != null) {
+            if (sRetrofitConf.getAuthenticator() != null) {
+                builder.authenticator(sRetrofitConf.getAuthenticator());
+            }
+
+            if (sRetrofitConf.isUseSSLConnection() && sRetrofitConf.getCertficatePinner() != null) {
                 builder.certificatePinner(sRetrofitConf.getCertficatePinner());
             }
 
@@ -58,6 +67,16 @@ public class EZRetrofit<T> {
             if (sRetrofitConf.getInterceptorList() != null && sRetrofitConf.getInterceptorList().size() > 0) {
                 for (Interceptor interceptor : sRetrofitConf.getInterceptorList()) {
                     builder.addInterceptor(interceptor);
+                }
+            }
+
+            if (sRetrofitConf.getConnectionPool() != null) {
+                builder.connectionPool(sRetrofitConf.getConnectionPool());
+            }
+
+            if (sRetrofitConf.getNetworkInterceptorList() != null) {
+                for (Interceptor interceptor : sRetrofitConf.getNetworkInterceptorList()) {
+                    builder.addNetworkInterceptor(interceptor);
                 }
             }
 

@@ -9,7 +9,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import okhttp3.Authenticator;
 import okhttp3.CertificatePinner;
+import okhttp3.ConnectionPool;
 import okhttp3.Interceptor;
 import okhttp3.Protocol;
 
@@ -25,16 +27,19 @@ public class RetrofitConf {
     private long mTimeout;
     private CookieHandler mCookieHandler;
     private List<Interceptor> mInterceptorList;
+    private List<Interceptor> mNetworkInterceptorList;
     private CertificatePinner mCertificatePinner;
-    private List<String> mEndPointList;
     private boolean isUseSecureRandom;
     private Map<Class<?>, String> mWebserviceMap;
     private List<Protocol> mProtocolList;
+    private Authenticator mAuthenticator;
+    private ConnectionPool mConnectionPool;
+    private boolean isRetryOnConnectionFailure;
 
     private RetrofitConf(Context context) {
         this.mContext = context;
-        this.mEndPointList = Collections.synchronizedList(new ArrayList<String>());
         this.mInterceptorList = Collections.synchronizedList(new ArrayList<Interceptor>());
+        this.mNetworkInterceptorList = Collections.synchronizedList(new ArrayList<Interceptor>());
         this.mWebserviceMap = Collections.synchronizedMap(new HashMap<Class<?>, String>());
         this.mProtocolList = Collections.synchronizedList(new ArrayList<Protocol>());
     }
@@ -107,6 +112,38 @@ public class RetrofitConf {
         return mInterceptorList;
     }
 
+    public void setAuthenticator(Authenticator authenticator) {
+        this.mAuthenticator = authenticator;
+    }
+
+    public Authenticator getAuthenticator() {
+        return mAuthenticator;
+    }
+
+    public void setConnectionPool(ConnectionPool connectionPool) {
+        this.mConnectionPool = connectionPool;
+    }
+
+    public ConnectionPool getConnectionPool() {
+        return mConnectionPool;
+    }
+
+    public void setNetworkInterceptorList(List<Interceptor> networkInterceptorList) {
+        this.mNetworkInterceptorList.addAll(networkInterceptorList);
+    }
+
+    public List<Interceptor> getNetworkInterceptorList() {
+        return mNetworkInterceptorList;
+    }
+
+    public void setRetryOnConnectionFailure(boolean retryOnConnectionFailure) {
+        this.isRetryOnConnectionFailure = retryOnConnectionFailure;
+    }
+
+    public boolean isRetryOnConnectionFailure() {
+        return isRetryOnConnectionFailure;
+    }
+
     public static class Builder {
 
         private Context _Context;
@@ -150,11 +187,6 @@ public class RetrofitConf {
             return this;
         }
 
-        public Builder setCertPins(String[] pins) {
-            _RetrofitConf.setCertPins(pins);
-            return this;
-        }
-
         public Builder setProtocols(List<Protocol> protocolList) {
             _RetrofitConf.setProtocols(protocolList);
             return this;
@@ -162,6 +194,26 @@ public class RetrofitConf {
 
         public Builder setInterceptors(List<Interceptor> interceptorList) {
             _RetrofitConf.setInterceptors(interceptorList);
+            return this;
+        }
+
+        public Builder setAuthenticator(Authenticator authenticator) {
+            _RetrofitConf.setAuthenticator(authenticator);
+            return this;
+        }
+
+        public Builder setConnectionPool(ConnectionPool connectionPool) {
+            _RetrofitConf.setConnectionPool(connectionPool);
+            return this;
+        }
+
+        public Builder setNetworkInterceptorList(List<Interceptor> networkInterceptorList) {
+            _RetrofitConf.setNetworkInterceptorList(networkInterceptorList);
+            return this;
+        }
+
+        public Builder setRetryOnConnectionFailure(boolean retryOnConnectionFailure) {
+            _RetrofitConf.setRetryOnConnectionFailure(retryOnConnectionFailure);
             return this;
         }
     }
