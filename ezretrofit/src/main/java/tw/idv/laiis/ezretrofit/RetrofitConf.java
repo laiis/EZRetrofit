@@ -10,8 +10,11 @@ import java.util.List;
 import java.util.Map;
 
 import okhttp3.Authenticator;
+import okhttp3.Cache;
 import okhttp3.CertificatePinner;
 import okhttp3.ConnectionPool;
+import okhttp3.Dispatcher;
+import okhttp3.Dns;
 import okhttp3.Interceptor;
 import okhttp3.Protocol;
 
@@ -34,7 +37,11 @@ public class RetrofitConf {
     private List<Protocol> mProtocolList;
     private Authenticator mAuthenticator;
     private ConnectionPool mConnectionPool;
-    private boolean isRetryOnConnectionFailure;
+    private boolean isRetryOnConnectionFailure = true;
+    private Cache mCache;
+    private Dispatcher mDispatcher;
+    private Dns mDns;
+    private boolean followRedirects = true;
 
     private RetrofitConf(Context context) {
         this.mContext = context;
@@ -144,6 +151,38 @@ public class RetrofitConf {
         return isRetryOnConnectionFailure;
     }
 
+    public Cache getCache() {
+        return mCache;
+    }
+
+    public void setCache(Cache cache) {
+        this.mCache = cache;
+    }
+
+    public Dispatcher getDispatcher() {
+        return mDispatcher;
+    }
+
+    public void setDispatcher(Dispatcher dispatcher) {
+        this.mDispatcher = dispatcher;
+    }
+
+    public Dns getDns() {
+        return mDns;
+    }
+
+    public void setDns(Dns dns) {
+        this.mDns = dns;
+    }
+
+    public boolean isFollowRedirects() {
+        return followRedirects;
+    }
+
+    public void setFollowRedirects(boolean followRedirects) {
+        this.followRedirects = followRedirects;
+    }
+
     public static class Builder {
 
         private Context _Context;
@@ -214,6 +253,26 @@ public class RetrofitConf {
 
         public Builder setRetryOnConnectionFailure(boolean retryOnConnectionFailure) {
             _RetrofitConf.setRetryOnConnectionFailure(retryOnConnectionFailure);
+            return this;
+        }
+
+        public Builder setCache(Cache cache) {
+            _RetrofitConf.setCache(cache);
+            return this;
+        }
+
+        public Builder setDispatcher(Dispatcher dispatcher) {
+            _RetrofitConf.setDispatcher(dispatcher);
+            return this;
+        }
+
+        public Builder setDns(Dns dns) {
+            _RetrofitConf.setDns(dns);
+            return this;
+        }
+
+        public Builder setFollowRedirects(boolean followRedirects) {
+            _RetrofitConf.setFollowRedirects(followRedirects);
             return this;
         }
     }

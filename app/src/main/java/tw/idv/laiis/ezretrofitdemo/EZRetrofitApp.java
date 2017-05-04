@@ -37,6 +37,7 @@ public class EZRetrofitApp extends Application {
         EZRetrofitCookieManager.newInstance().initial(sEZRetrofitApp, sEZRetrofitApp.getSharedPreferences("test", Context.MODE_PRIVATE));
         EZRetrofit.initial(new RetrofitConf.Builder(getEZRetrofitApp())
                 .setCookieHandler(EZRetrofitCookieManager.newInstance().getCookieManager())
+                .setFollowRedirects()
                 .timeout(15L)
                 .setAuthenticator(new Authenticator() {
                     @Override

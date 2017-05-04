@@ -31,60 +31,86 @@ public class EZRetrofit<T> {
 
     }
 
-    @NonNull
-    public static void initial(RetrofitConf retrofitConf) {
+    public static void initial(@NonNull RetrofitConf retrofitConf) {
         synchronized (EZRetrofit.class) {
             sRetrofitMap.clear();
             sRetrofitConf = retrofitConf;
-
-            OkHttpClient client = null;
-            OkHttpClient.Builder builder = new OkHttpClient.Builder();
-            if (sRetrofitConf.getTimeout() > 0L) {
-                builder.connectTimeout(retrofitConf.getTimeout(), TimeUnit.SECONDS);
-                builder.readTimeout(retrofitConf.getTimeout(), TimeUnit.SECONDS);
-            }
-
-            if (sRetrofitConf.getAuthenticator() != null) {
-                builder.authenticator(sRetrofitConf.getAuthenticator());
-            }
-
-            if (sRetrofitConf.isUseSSLConnection() && sRetrofitConf.getCertficatePinner() != null) {
-                builder.certificatePinner(sRetrofitConf.getCertficatePinner());
-            }
-
-            if (sRetrofitConf.getCertPins() != null) {
-                builder.connectionPool(new ConnectionPool());
-            }
-
-            if (sRetrofitConf.getCookieHandler() != null) {
-                builder.cookieJar(new JavaNetCookieJar(sRetrofitConf.getCookieHandler()));
-            }
-
-            if (sRetrofitConf.getProtocols() != null && sRetrofitConf.getProtocols().size() > 0) {
-                builder.protocols(sRetrofitConf.getProtocols());
-            }
-
-            if (sRetrofitConf.getInterceptorList() != null && sRetrofitConf.getInterceptorList().size() > 0) {
-                for (Interceptor interceptor : sRetrofitConf.getInterceptorList()) {
-                    builder.addInterceptor(interceptor);
-                }
-            }
-
-            if (sRetrofitConf.getConnectionPool() != null) {
-                builder.connectionPool(sRetrofitConf.getConnectionPool());
-            }
-
-            if (sRetrofitConf.getNetworkInterceptorList() != null) {
-                for (Interceptor interceptor : sRetrofitConf.getNetworkInterceptorList()) {
-                    builder.addNetworkInterceptor(interceptor);
-                }
-            }
-
-            client = builder.build();
-
-            sBuilder = new Retrofit.Builder()
-                    .client(client);
+            sBuilder = build(retrofitConf);
         }
+    }
+
+    private static Retrofit.Builder build(@NonNull RetrofitConf retrofitConf) {
+        OkHttpClient client = null;
+        OkHttpClient.Builder builder = new OkHttpClient.Builder();
+        if (retrofitConf.getTimeout() > 0L) {
+            builder.connectTimeout(retrofitConf.getTimeout(), TimeUnit.SECONDS);
+            builder.readTimeout(retrofitConf.getTimeout(), TimeUnit.SECONDS);
+        }
+
+        if (retrofitConf.getAuthenticator() != null) {
+            builder.authenticator(retrofitConf.getAuthenticator());
+        }
+
+        if (retrofitConf.isUseSSLConnection() && retrofitConf.getCertficatePinner() != null) {
+            builder.certificatePinner(retrofitConf.getCertficatePinner());
+        }
+
+        if (retrofitConf.getCertPins() != null) {
+            builder.connectionPool(new ConnectionPool());
+        }
+
+        if (retrofitConf.getCookieHandler() != null) {
+            builder.cookieJar(new JavaNetCookieJar(retrofitConf.getCookieHandler()));
+        }
+
+        if (retrofitConf.getProtocols() != null && retrofitConf.getProtocols().size() > 0) {
+            builder.protocols(retrofitConf.getProtocols());
+        }
+
+        if (retrofitConf.getInterceptorList() != null && retrofitConf.getInterceptorList().size() > 0) {
+            for (Interceptor interceptor : retrofitConf.getInterceptorList()) {
+                builder.addInterceptor(interceptor);
+            }
+        }
+
+        if (retrofitConf.getConnectionPool() != null) {
+            builder.connectionPool(retrofitConf.getConnectionPool());
+        }
+
+        if (retrofitConf.getNetworkInterceptorList() != null) {
+            for (Interceptor interceptor : retrofitConf.getNetworkInterceptorList()) {
+                builder.addNetworkInterceptor(interceptor);
+            }
+        }
+
+        if (retrofitConf.getCache() != null) {
+            builder.cache(retrofitConf.getCache());
+        }
+
+        if (retrofitConf.getDispatcher() != null) {
+            builder.dispatcher(retrofitConf.getDispatcher());
+        }
+
+        if (retrofitConf.getDns() != null) {
+            builder.dns(retrofitConf.getDns());
+        }
+
+        builder.followRedirects(retrofitConf.isFollowRedirects());
+        builder.followSslRedirects(retrofitConf.followSslRedirects());
+        builder.hostnameVerifier();
+        builder.pingInterval();
+        builder.proxy();
+        builder.proxyAuthenticator();
+        builder.proxySelector();
+        builder.socketFactory();
+        builder.sslSocketFactory();
+
+
+        client = builder.build();
+
+        Retrofit.Builder retrofitBuilder = new Retrofit.Builder()
+                .client(client);
+        return retrofitBuilder;
     }
 
     public static boolean isInitial() {
@@ -123,31 +149,45 @@ public class EZRetrofit<T> {
 
     public static <T> EZRetrofitHelper<T> create(RetrofitConf retrofitConf) {
         checkInitialStatus();
-        EZRetrofitHelper<T> helper = new EZRetrofitHelper<T>(retrofitConf);
+        EZRetrofitHelper<T> helper = new EZRetrofitHelper<T>(build(retrofitConf), retrofitConf);
+        helper.setRetrofitMap(sRetrofitMap);
         return helper;
     }
 
     public static <T> EZRetrofitHelper<T> create() {
-        return create(sRetrofitConf);
+        checkInitialStatus();
+        EZRetrofitHelper<T> helper = new EZRetrofitHelper<T>(sRetrofitConf);
+        helper.setRetrofitMap(sRetrofitMap);
+        return helper;
     }
 
     public static class EZRetrofitHelper<T> {
 
         private RetrofitConf _RetrofitConf;
+        private Retrofit.Builder _Builder;
+        private Map<Class<?>, Retrofit> _RetrofitMap;
 
         public EZRetrofitHelper(RetrofitConf conf) {
+            this(sBuilder, conf);
+        }
+
+        public EZRetrofitHelper(Retrofit.Builder builder, RetrofitConf conf) {
             this._RetrofitConf = conf;
+            this._Builder = builder;
+        }
+
+        public void setRetrofitMap(Map<Class<?>, Retrofit> retrofitMap) {
+            this._RetrofitMap = retrofitMap;
         }
 
         public T webservice(Class<T> clsWebservice) {
-            if (sRetrofitMap.get(clsWebservice) == null) {
-                Retrofit retrofit = sBuilder.baseUrl(_RetrofitConf.getBaseUrl(clsWebservice))
+            if (_RetrofitMap.get(clsWebservice) == null) {
+                Retrofit retrofit = _Builder.baseUrl(_RetrofitConf.getBaseUrl(clsWebservice))
                         .build();
-
-                sRetrofitMap.put(clsWebservice, retrofit);
+                _RetrofitMap.put(clsWebservice, retrofit);
             }
 
-            Retrofit retrofit = sRetrofitMap.get(clsWebservice);
+            Retrofit retrofit = _RetrofitMap.get(clsWebservice);
 
             return retrofit.create(clsWebservice);
         }
