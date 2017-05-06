@@ -9,6 +9,7 @@ import okhttp3.Authenticator;
 import okhttp3.Request;
 import okhttp3.Response;
 import okhttp3.Route;
+import retrofit2.converter.gson.GsonConverterFactory;
 import tw.idv.laiis.ezretrofit.EZRetrofit;
 import tw.idv.laiis.ezretrofit.RetrofitConf;
 import tw.idv.laiis.ezretrofit.managers.EZRetrofitCookieManager;
@@ -37,8 +38,8 @@ public class EZRetrofitApp extends Application {
         EZRetrofitCookieManager.newInstance().initial(sEZRetrofitApp, sEZRetrofitApp.getSharedPreferences("test", Context.MODE_PRIVATE));
         EZRetrofit.initial(new RetrofitConf.Builder(getEZRetrofitApp())
                 .setCookieHandler(EZRetrofitCookieManager.newInstance().getCookieManager())
-                .setFollowRedirects()
                 .timeout(15L)
+                .addConverterFactory(GsonConverterFactory.create())
                 .setAuthenticator(new Authenticator() {
                     @Override
                     public Request authenticate(Route route, Response response) throws IOException {
