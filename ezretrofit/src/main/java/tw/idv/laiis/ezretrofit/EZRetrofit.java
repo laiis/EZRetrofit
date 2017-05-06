@@ -16,7 +16,6 @@ import retrofit2.CallAdapter;
 import retrofit2.Callback;
 import retrofit2.Converter;
 import retrofit2.Retrofit;
-import tw.idv.laiis.ezretrofit.managers.CallManager;
 
 /**
  * Created by laiis on 2017/4/28.
@@ -171,7 +170,7 @@ public class EZRetrofit<T> {
         }
     }
 
-    public static void count(Object obj, Call call, Callback callback) {
+    public static void call(Object obj, Call call, Callback callback) {
         checkInitialStatus();
         String tag = "";
         if (obj != null) {
@@ -182,7 +181,17 @@ public class EZRetrofit<T> {
     }
 
     public static void call(Call call, Callback callback) {
-        count(null, call, callback);
+        call(null, call, callback);
+    }
+
+    public static int count() {
+        checkInitialStatus();
+        return CallManager.newInstance().requestAmount();
+    }
+
+    public static int count(Object obj) {
+        checkInitialStatus();
+        return CallManager.newInstance().requestAmount(obj.getClass().getName());
     }
 
     public static void stop(Object obj) {

@@ -1,4 +1,4 @@
-package tw.idv.laiis.ezretrofit.managers;
+package tw.idv.laiis.ezretrofit;
 
 import android.util.Log;
 
@@ -13,7 +13,7 @@ import retrofit2.Callback;
 /**
  * Created by laiis on 2017/4/25.
  */
-public class CallManager {
+final class CallManager {
 
     private static final String TAG = CallManager.class.getName();
 
@@ -106,6 +106,14 @@ public class CallManager {
         }
 
         Log.d(TAG, " ---> " + sb.toString());
+    }
+
+    public int requestAmount() {
+        return mCallMap.size();
+    }
+
+    public int requestAmount(String presenterName) {
+        return mCounterMap.get(presenterName).getReqCount();
     }
 
     public boolean isRequestEmpty() {
