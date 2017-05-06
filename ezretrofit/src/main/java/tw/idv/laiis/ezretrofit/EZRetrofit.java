@@ -12,7 +12,9 @@ import okhttp3.Interceptor;
 import okhttp3.JavaNetCookieJar;
 import okhttp3.OkHttpClient;
 import retrofit2.Call;
+import retrofit2.CallAdapter;
 import retrofit2.Callback;
+import retrofit2.Converter;
 import retrofit2.Retrofit;
 import tw.idv.laiis.ezretrofit.managers.CallManager;
 
@@ -42,6 +44,10 @@ public class EZRetrofit<T> {
     private static Retrofit.Builder build(@NonNull RetrofitConf retrofitConf) {
         OkHttpClient client = null;
         OkHttpClient.Builder builder = new OkHttpClient.Builder();
+
+        builder.followRedirects(retrofitConf.isFollowRedirects());
+        builder.followSslRedirects(retrofitConf.isFollowSslRedirects());
+
         if (retrofitConf.getTimeout() > 0L) {
             builder.connectTimeout(retrofitConf.getTimeout(), TimeUnit.SECONDS);
             builder.readTimeout(retrofitConf.getTimeout(), TimeUnit.SECONDS);
@@ -95,21 +101,63 @@ public class EZRetrofit<T> {
             builder.dns(retrofitConf.getDns());
         }
 
-        builder.followRedirects(retrofitConf.isFollowRedirects());
-        builder.followSslRedirects(retrofitConf.followSslRedirects());
-        builder.hostnameVerifier();
-        builder.pingInterval();
-        builder.proxy();
-        builder.proxyAuthenticator();
-        builder.proxySelector();
-        builder.socketFactory();
-        builder.sslSocketFactory();
+        if (retrofitConf.getHostnameVerifier() != null) {
+            builder.hostnameVerifier(retrofitConf.getHostnameVerifier());
+        }
 
+        if (retrofitConf.getPinInterval() != null) {
+            RetrofitConf.PinInterval pinInterval = retrofitConf.getPinInterval();
+            builder.pingInterval(pinInterval.getInterval(), pinInterval.getTimeUnit());
+        }
+
+        if (retrofitConf.getProxy() != null) {
+            builder.proxy(retrofitConf.getProxy());
+        }
+
+        if (retrofitConf.getProxyAuthenticator() != null) {
+            builder.proxyAuthenticator(retrofitConf.getProxyAuthenticator());
+        }
+
+        if (retrofitConf.getProxySelector() != null) {
+            builder.proxySelector(retrofitConf.getProxySelector());
+        }
+
+        if (retrofitConf.getSocketFactory() != null) {
+            builder.socketFactory(retrofitConf.getSocketFactory());
+        }
+
+        if (retrofitConf.getSSLFactoryManager() != null) {
+            RetrofitConf.SSLFactoryManager sslFactoryManager = retrofitConf.getSSLFactoryManager();
+            builder.sslSocketFactory(sslFactoryManager.getSslSocketFactory(), sslFactoryManager.getX509TrustManager());
+        }
 
         client = builder.build();
 
         Retrofit.Builder retrofitBuilder = new Retrofit.Builder()
                 .client(client);
+
+        if (retrofitConf.getCallAdapterFactoryList() != null && retrofitConf.getCallAdapterFactoryList().size() > 0) {
+            for (CallAdapter.Factory factory : retrofitConf.getCallAdapterFactoryList()) {
+                retrofitBuilder.addCallAdapterFactory(factory);
+            }
+        }
+
+        if (retrofitConf.getConverterFactoryList() != null && retrofitConf.getConverterFactoryList().size() > 0) {
+            for (Converter.Factory factory : retrofitConf.getConverterFactoryList()) {
+                retrofitBuilder.addConverterFactory(factory);
+            }
+        }
+
+        if (retrofitConf.getExecutor() != null) {
+            retrofitBuilder.callbackExecutor(retrofitConf.getExecutor());
+        }
+
+        if (retrofitConf.getOKHttp3Factory() != null) {
+            retrofitBuilder.callFactory(retrofitConf.getOKHttp3Factory());
+        }
+
+        retrofitBuilder.validateEagerly(retrofitConf.isValidateEagerly());
+
         return retrofitBuilder;
     }
 

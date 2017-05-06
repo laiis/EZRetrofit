@@ -3,20 +3,32 @@ package tw.idv.laiis.ezretrofit;
 import android.content.Context;
 
 import java.net.CookieHandler;
+import java.net.Proxy;
+import java.net.ProxySelector;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.Executor;
+import java.util.concurrent.TimeUnit;
+
+import javax.net.SocketFactory;
+import javax.net.ssl.HostnameVerifier;
+import javax.net.ssl.SSLSocketFactory;
+import javax.net.ssl.X509TrustManager;
 
 import okhttp3.Authenticator;
 import okhttp3.Cache;
+import okhttp3.Call;
 import okhttp3.CertificatePinner;
 import okhttp3.ConnectionPool;
 import okhttp3.Dispatcher;
 import okhttp3.Dns;
 import okhttp3.Interceptor;
 import okhttp3.Protocol;
+import retrofit2.CallAdapter;
+import retrofit2.Converter;
 
 /**
  * Created by laiis on 2017/4/27.
@@ -42,6 +54,19 @@ public class RetrofitConf {
     private Dispatcher mDispatcher;
     private Dns mDns;
     private boolean followRedirects = true;
+    private boolean followSslRedirects = true;
+    private HostnameVerifier mHostnameVerifier;
+    private PinInterval mPinInterval;
+    private Proxy mProxy;
+    private Authenticator mProxyAuthenticator;
+    private List<CallAdapter.Factory> mCallAdapterFactoryList;
+    private ProxySelector mProxySelector;
+    private SocketFactory mSocketFactory;
+    private SSLFactoryManager mSSLFactoryManager;
+    private List<Converter.Factory> mConverterFactoryList;
+    private boolean isValidateEagerly;
+    private Executor mExecutor;
+    private okhttp3.Call.Factory mOKHttp3Factory;
 
     private RetrofitConf(Context context) {
         this.mContext = context;
@@ -49,6 +74,8 @@ public class RetrofitConf {
         this.mNetworkInterceptorList = Collections.synchronizedList(new ArrayList<Interceptor>());
         this.mWebserviceMap = Collections.synchronizedMap(new HashMap<Class<?>, String>());
         this.mProtocolList = Collections.synchronizedList(new ArrayList<Protocol>());
+        this.mCallAdapterFactoryList = Collections.synchronizedList(new ArrayList<CallAdapter.Factory>());
+        this.mConverterFactoryList = Collections.synchronizedList(new ArrayList<Converter.Factory>());
     }
 
     public void setCookieHandler(CookieHandler cookieHandler) {
@@ -183,6 +210,110 @@ public class RetrofitConf {
         this.followRedirects = followRedirects;
     }
 
+    public boolean isFollowSslRedirects() {
+        return followSslRedirects;
+    }
+
+    public void setFollowSslRedirects(boolean followSslRedirects) {
+        this.followSslRedirects = followSslRedirects;
+    }
+
+    public HostnameVerifier getHostnameVerifier() {
+        return mHostnameVerifier;
+    }
+
+    public void setHostnameVerifier(HostnameVerifier hostnameVerifier) {
+        this.mHostnameVerifier = mHostnameVerifier;
+    }
+
+    public void setPingInterval(PinInterval pingInterval) {
+        this.mPinInterval = pingInterval;
+    }
+
+    public PinInterval getPinInterval() {
+        return mPinInterval;
+    }
+
+    public Proxy getProxy() {
+        return mProxy;
+    }
+
+    public void setProxy(Proxy proxy) {
+        this.mProxy = proxy;
+    }
+
+    public Authenticator getProxyAuthenticator() {
+        return mProxyAuthenticator;
+    }
+
+    public void setProxyAuthenticator(Authenticator proxyAuthenticator) {
+        this.mProxyAuthenticator = proxyAuthenticator;
+    }
+
+    public List<CallAdapter.Factory> getCallAdapterFactoryList() {
+        return mCallAdapterFactoryList;
+    }
+
+    public void addCallAdapterFactory(CallAdapter.Factory callAdapterFactory) {
+        this.mCallAdapterFactoryList.add(callAdapterFactory);
+    }
+
+    public ProxySelector getProxySelector() {
+        return mProxySelector;
+    }
+
+    public void setProxySelector(ProxySelector proxySelector) {
+        this.mProxySelector = proxySelector;
+    }
+
+    public SocketFactory getSocketFactory() {
+        return mSocketFactory;
+    }
+
+    public void setSocketFactory(SocketFactory socketFactory) {
+        this.mSocketFactory = socketFactory;
+    }
+
+    public SSLFactoryManager getSSLFactoryManager() {
+        return mSSLFactoryManager;
+    }
+
+    public void setSSLFactoryManager(SSLFactoryManager sslFactoryManager) {
+        this.mSSLFactoryManager = sslFactoryManager;
+    }
+
+    public List<Converter.Factory> getConverterFactoryList() {
+        return mConverterFactoryList;
+    }
+
+    public void addConverterFactory(Converter.Factory converterFactory) {
+        this.mConverterFactoryList.add(converterFactory);
+    }
+
+    public boolean isValidateEagerly() {
+        return isValidateEagerly;
+    }
+
+    public void setValidateEagerly(boolean validateEagerly) {
+        isValidateEagerly = validateEagerly;
+    }
+
+    public Executor getExecutor() {
+        return mExecutor;
+    }
+
+    public void setExecutor(Executor executor) {
+        this.mExecutor = executor;
+    }
+
+    public Call.Factory getOKHttp3Factory() {
+        return mOKHttp3Factory;
+    }
+
+    public void setOKHttp3Factory(Call.Factory okHttp3Factory) {
+        this.mOKHttp3Factory = okHttp3Factory;
+    }
+
     public static class Builder {
 
         private Context _Context;
@@ -274,6 +405,109 @@ public class RetrofitConf {
         public Builder setFollowRedirects(boolean followRedirects) {
             _RetrofitConf.setFollowRedirects(followRedirects);
             return this;
+        }
+
+        public Builder setFollowSslRedirects(boolean followSslRedirects) {
+            _RetrofitConf.setFollowSslRedirects(followSslRedirects);
+            return this;
+        }
+
+        public Builder setHostnameVerifier(HostnameVerifier hostnameVerifier) {
+            _RetrofitConf.setHostnameVerifier(hostnameVerifier);
+            return this;
+        }
+
+        public Builder setPinInterval(PinInterval pinInterval) {
+            _RetrofitConf.setPingInterval(pinInterval);
+            return this;
+        }
+
+        public Builder setProxy(Proxy proxy) {
+            _RetrofitConf.setProxy(proxy);
+            return this;
+        }
+
+        public Builder setProxyAuthencator(Authenticator proxyAuthencator) {
+            _RetrofitConf.setProxyAuthenticator(proxyAuthencator);
+            return this;
+        }
+
+        public Builder addCallAdapterFactory(CallAdapter.Factory callAdapterFactory) {
+            _RetrofitConf.addCallAdapterFactory(callAdapterFactory);
+            return this;
+        }
+
+        public Builder setProxySelector(ProxySelector proxySelector) {
+            _RetrofitConf.setProxySelector(proxySelector);
+            return this;
+        }
+
+        public Builder setSocketFactory(SocketFactory socketFactory) {
+            _RetrofitConf.setSocketFactory(socketFactory);
+            return this;
+        }
+
+        public Builder setSSLFactoryManager(SSLFactoryManager sslFactoryManager) {
+            _RetrofitConf.setSSLFactoryManager(sslFactoryManager);
+            return this;
+        }
+
+        public Builder addConverterFactory(Converter.Factory converterFactory) {
+            _RetrofitConf.addConverterFactory(converterFactory);
+            return this;
+        }
+
+        public Builder setValidateEagerly(boolean validateEagerly) {
+            _RetrofitConf.setValidateEagerly(validateEagerly);
+            return this;
+        }
+
+        public Builder setExecutor(Executor executor) {
+            _RetrofitConf.setExecutor(executor);
+            return this;
+        }
+
+        public Builder setOKHttp3Factory(Call.Factory okHttp3Factory) {
+            _RetrofitConf.setOKHttp3Factory(okHttp3Factory);
+            return this;
+        }
+    }
+
+    public static class PinInterval {
+
+        private long _Interval;
+        private TimeUnit _TimeUnit;
+
+        public PinInterval(long interval, TimeUnit timeunit) {
+            this._Interval = interval;
+            this._TimeUnit = timeunit;
+        }
+
+        public long getInterval() {
+            return _Interval;
+        }
+
+        public TimeUnit getTimeUnit() {
+            return _TimeUnit;
+        }
+    }
+
+    public static class SSLFactoryManager {
+
+        private SSLSocketFactory _SslSocketFactory;
+        private X509TrustManager _TrustManager;
+
+        public SSLFactoryManager(SSLSocketFactory sslSocketFactory, X509TrustManager trustManager) {
+            this._SslSocketFactory = sslSocketFactory;
+            this._TrustManager = trustManager;
+        }
+
+        public SSLSocketFactory getSslSocketFactory() {
+            return _SslSocketFactory;
+        }
+
+        public X509TrustManager getX509TrustManager() {
+            return _TrustManager;
         }
     }
 }
