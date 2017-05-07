@@ -3,12 +3,8 @@ package tw.idv.laiis.ezretrofitdemo;
 import android.app.Application;
 import android.content.Context;
 
-import java.io.IOException;
+import java.net.CookiePolicy;
 
-import okhttp3.Authenticator;
-import okhttp3.Request;
-import okhttp3.Response;
-import okhttp3.Route;
 import retrofit2.converter.gson.GsonConverterFactory;
 import tw.idv.laiis.ezretrofit.EZRetrofit;
 import tw.idv.laiis.ezretrofit.RetrofitConf;
@@ -35,18 +31,10 @@ public class EZRetrofitApp extends Application {
 
     public static void initialEZRetrofit() {
         // I want to use this pattern to call api.
-        EZRetrofitCookieManager.newInstance().initial(sEZRetrofitApp, sEZRetrofitApp.getSharedPreferences("test", Context.MODE_PRIVATE));
+        EZRetrofitCookieManager.newInstance().initial(sEZRetrofitApp, sEZRetrofitApp.getSharedPreferences("test", Context.MODE_PRIVATE), CookiePolicy.ACCEPT_ALL);
         EZRetrofit.initial(new RetrofitConf.Builder(getEZRetrofitApp())
                 .setCookieHandler(EZRetrofitCookieManager.newInstance().getCookieManager())
-                .timeout(15L)
                 .addConverterFactory(GsonConverterFactory.create())
-                .setAuthenticator(new Authenticator() {
-                    @Override
-                    public Request authenticate(Route route, Response response) throws IOException {
-                        return null;
-                    }
-                })
-                .setRetryOnConnectionFailure(true)
                 .baseUrls(JsonWebservice.class, "http://data.taipei/")
                 .build());
     }

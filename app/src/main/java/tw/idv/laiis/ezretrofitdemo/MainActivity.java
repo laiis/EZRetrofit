@@ -2,6 +2,7 @@ package tw.idv.laiis.ezretrofitdemo;
 
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
+import android.util.Log;
 import android.widget.Toast;
 
 import java.io.BufferedReader;
@@ -10,8 +11,8 @@ import java.io.InputStreamReader;
 import okhttp3.ResponseBody;
 import retrofit2.Call;
 import retrofit2.Response;
+import tw.idv.laiis.ezretrofit.EZCallback;
 import tw.idv.laiis.ezretrofit.EZRetrofit;
-import tw.idv.laiis.ezretrofit.TemplateCallback;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -21,9 +22,9 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
 
         EZRetrofit.EZRetrofitHelper<JsonWebservice> helper = EZRetrofit.create();
-        EZRetrofit.call(helper.webservice(JsonWebservice.class)
+        EZRetrofit.call(this, helper.webservice(JsonWebservice.class)
                         .getTestData("opendata/datalist/apiAccess", "datasetMetadataSearch", "臺北市文化快遞資訊"),
-                new TemplateCallback<ResponseBody>() {
+                new EZCallback<ResponseBody>() {
                     @Override
                     public void success(Call<ResponseBody> call, Response<ResponseBody> response) {
                         String tag = "";
@@ -41,6 +42,8 @@ public class MainActivity extends AppCompatActivity {
                         }
 
                         Toast.makeText(MainActivity.this, "success: " + tag, Toast.LENGTH_SHORT).show();
+
+                        Log.d("MainActivity", " ---> EZRetrofit.count(this): " + EZRetrofit.count(this));
                     }
 
                     @Override

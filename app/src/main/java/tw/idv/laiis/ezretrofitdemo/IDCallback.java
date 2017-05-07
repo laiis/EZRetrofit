@@ -2,13 +2,13 @@ package tw.idv.laiis.ezretrofitdemo;
 
 import retrofit2.Call;
 import retrofit2.Response;
-import tw.idv.laiis.ezretrofit.TemplateCallback;
+import tw.idv.laiis.ezretrofit.EZCallback;
 
 /**
  * Created by laiis on 2017/4/30.
  */
 
-public abstract class IDCallback extends TemplateCallback {
+public abstract class IDCallback extends EZCallback {
 
     protected long mId;
 
