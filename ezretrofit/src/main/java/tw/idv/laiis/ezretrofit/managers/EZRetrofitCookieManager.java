@@ -39,8 +39,8 @@ public class EZRetrofitCookieManager {
 
     }
 
-    public void initial(Context context, SharedPreferences sharedPreferences) {
-        mCookieManager = new CookieManager(new PersistentCookieStore(sharedPreferences), CookiePolicy.ACCEPT_ALL);
+    public void initial(Context context, SharedPreferences sharedPreferences, CookiePolicy cookiePolicy) {
+        mCookieManager = new CookieManager(new PersistentCookieStore(sharedPreferences), cookiePolicy);
         mWebViewCookieManager = android.webkit.CookieManager.getInstance();
 
         CookieHandler.setDefault(mCookieManager);
@@ -69,6 +69,7 @@ public class EZRetrofitCookieManager {
     }
 
     public void clearAllCookies() {
+        checkInitialYet();
         mCookieManager.getCookieStore().removeAll();
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
             mWebViewCookieManager.removeAllCookies(new ValueCallback<Boolean>() {

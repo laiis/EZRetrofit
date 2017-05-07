@@ -7,7 +7,6 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
-import okhttp3.ConnectionPool;
 import okhttp3.Interceptor;
 import okhttp3.JavaNetCookieJar;
 import okhttp3.OkHttpClient;
@@ -54,14 +53,6 @@ public class EZRetrofit<T> {
 
         if (retrofitConf.getAuthenticator() != null) {
             builder.authenticator(retrofitConf.getAuthenticator());
-        }
-
-        if (retrofitConf.isUseSSLConnection() && retrofitConf.getCertficatePinner() != null) {
-            builder.certificatePinner(retrofitConf.getCertficatePinner());
-        }
-
-        if (retrofitConf.getCertPins() != null) {
-            builder.connectionPool(new ConnectionPool());
         }
 
         if (retrofitConf.getCookieHandler() != null) {
@@ -125,9 +116,15 @@ public class EZRetrofit<T> {
             builder.socketFactory(retrofitConf.getSocketFactory());
         }
 
-        if (retrofitConf.getSSLFactoryManager() != null) {
-            RetrofitConf.SSLFactoryManager sslFactoryManager = retrofitConf.getSSLFactoryManager();
-            builder.sslSocketFactory(sslFactoryManager.getSslSocketFactory(), sslFactoryManager.getX509TrustManager());
+
+        if (retrofitConf.isUseSSLConnection()) {
+
+            if (retrofitConf.getCertficatePinner() != null) {
+                builder.certificatePinner(retrofitConf.getCertficatePinner());
+            } else if (retrofitConf.getSSLFactoryManager() != null) {
+                RetrofitConf.SSLFactoryManager sslFactoryManager = retrofitConf.getSSLFactoryManager();
+                builder.sslSocketFactory(sslFactoryManager.getSslSocketFactory(), sslFactoryManager.getX509TrustManager());
+            }
         }
 
         client = builder.build();

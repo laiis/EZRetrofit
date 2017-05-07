@@ -5,6 +5,9 @@ import android.content.Context;
 import java.net.CookieHandler;
 import java.net.Proxy;
 import java.net.ProxySelector;
+import java.security.GeneralSecurityException;
+import java.security.KeyStore;
+import java.security.SecureRandom;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -15,7 +18,11 @@ import java.util.concurrent.TimeUnit;
 
 import javax.net.SocketFactory;
 import javax.net.ssl.HostnameVerifier;
+import javax.net.ssl.KeyManager;
+import javax.net.ssl.SSLContext;
+import javax.net.ssl.SSLHandshakeException;
 import javax.net.ssl.SSLSocketFactory;
+import javax.net.ssl.TrustManager;
 import javax.net.ssl.X509TrustManager;
 
 import okhttp3.Authenticator;
@@ -29,6 +36,7 @@ import okhttp3.Interceptor;
 import okhttp3.Protocol;
 import retrofit2.CallAdapter;
 import retrofit2.Converter;
+import tw.idv.laiis.ezretrofit.managers.EZRetrofitTrustManager;
 
 /**
  * Created by laiis on 2017/4/27.
@@ -38,13 +46,13 @@ public class RetrofitConf {
 
     private Context mContext;
     private boolean isUseSSL;
+    private String mProtocol;
     private String[] mCertPins;
-    private long mTimeout;
+    private long mTimeout = 15L; // default
     private CookieHandler mCookieHandler;
     private List<Interceptor> mInterceptorList;
     private List<Interceptor> mNetworkInterceptorList;
     private CertificatePinner mCertificatePinner;
-    private boolean isUseSecureRandom;
     private Map<Class<?>, String> mWebserviceMap;
     private List<Protocol> mProtocolList;
     private Authenticator mAuthenticator;
@@ -96,6 +104,14 @@ public class RetrofitConf {
 
     public boolean isUseSSLConnection() {
         return isUseSSL;
+    }
+
+    public void setProtocol(String protocol) {
+        this.mProtocol = protocol;
+    }
+
+    public String getProtocol() {
+        return mProtocol;
     }
 
     public void setCertPins(String[] certPins) {
@@ -471,6 +487,11 @@ public class RetrofitConf {
             _RetrofitConf.setOKHttp3Factory(okHttp3Factory);
             return this;
         }
+
+        public Builder setProtocol(String protocol) {
+            _RetrofitConf.setProtocol(protocol);
+            return this;
+        }
     }
 
     public static class PinInterval {
@@ -492,14 +513,29 @@ public class RetrofitConf {
         }
     }
 
+    /**
+     * 待驗證
+     */
     public static class SSLFactoryManager {
 
         private SSLSocketFactory _SslSocketFactory;
         private X509TrustManager _TrustManager;
 
-        public SSLFactoryManager(SSLSocketFactory sslSocketFactory, X509TrustManager trustManager) {
-            this._SslSocketFactory = sslSocketFactory;
-            this._TrustManager = trustManager;
+        public SSLSocketFactory getSSLSocketFactory(KeyManager keyMgr, String protocol, X509TrustManager trustManager) throws SSLHandshakeException, GeneralSecurityException {
+            SSLContext sslContext = SSLContext.getInstance(protocol);
+            sslContext.init(new KeyManager[]{keyMgr}, new TrustManager[]{trustManager}, SecureRandom.getInstance("SHA1PRNG"));
+            return sslContext.getSocketFactory();
+        }
+
+        public SSLFactoryManager(String protocol, KeyManager keyMgr, KeyStore keyStore, String[] pins) {
+            try {
+                this._TrustManager = new EZRetrofitTrustManager(keyStore, pins);
+                this._SslSocketFactory = getSSLSocketFactory(keyMgr, protocol, _TrustManager);
+            } catch (Exception e) {
+                if (BuildConfig.DEBUG) {
+                    e.printStackTrace();
+                }
+            }
         }
 
         public SSLSocketFactory getSslSocketFactory() {

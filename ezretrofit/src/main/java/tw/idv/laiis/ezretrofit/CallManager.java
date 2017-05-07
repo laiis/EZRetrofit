@@ -113,7 +113,10 @@ final class CallManager {
     }
 
     public int requestAmount(String presenterName) {
-        return mCounterMap.get(presenterName).getReqCount();
+        if (mCounterMap.get(presenterName) != null) {
+            return mCounterMap.get(presenterName).getReqCount();
+        }
+        return 0;
     }
 
     public boolean isRequestEmpty() {

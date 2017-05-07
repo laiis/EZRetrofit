@@ -8,7 +8,7 @@ import retrofit2.Response;
  * Created by laiis on 2017/4/27.
  */
 
-public abstract class TemplateCallback<T> implements Callback<T> {
+public abstract class EZCallback<T> implements Callback<T> {
 
     @Override
     public final void onResponse(Call<T> call, Response<T> response) {

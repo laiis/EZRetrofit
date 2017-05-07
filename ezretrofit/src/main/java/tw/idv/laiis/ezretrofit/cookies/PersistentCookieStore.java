@@ -21,11 +21,8 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
- * author: <a href="http://www.jiechic.com" target="_blank">jiechic</a> on 15/5/27.
- * ref: <a href="http://www.jiechic.com/archives/cookie-automatic-management-optimization-of-okhttp-framework" target="_blank">jiechic's blog</>
- */
-
-/**
+ * author: <a href="http://www.jiechic.com" target="_blank">jiechic</a> on 15/5/27.<br/>
+ * ref: <a href="http://www.jiechic.com/archives/cookie-automatic-management-optimization-of-okhttp-framework" target="_blank">jiechic's blog</a><br/>
  * A persistent cookie store which implements the Apache HttpClient CookieStore interface.
  * Cookies are stored and will persist on the user's device between application sessions since they
  * are serialized and stored in SharedPreferences. Instances of this class are
