@@ -28,6 +28,5 @@ dependencies {
     compile 'com.android.support.constraint:constraint-layout:1.0.2'
     testCompile 'junit:junit:4.12'
 
-//    compile project(":ezretrofit");
-    compile 'com.github.laiis:EZRetrofit:-SNAPSHOT'
+    compile 'com.github.laiis:EZRetrofit:v0.0.2'
 }
