@@ -23,7 +23,7 @@ public class MainActivity extends AppCompatActivity {
 
         EZRetrofit.EZRetrofitHelper<JsonWebservice> helper = EZRetrofit.create();
         EZRetrofit.call(this, helper.webservice(JsonWebservice.class)
-                        .getTestData("opendata/datalist/apiAccess", "datasetMetadataSearch", "臺北市文化快遞資訊"),
+                        .getTestData("", "datasetMetadataSearch", "臺北市文化快遞資訊"),
                 new EZCallback<ResponseBody>() {
                     @Override
                     public void success(Call<ResponseBody> call, Response<ResponseBody> response) {
@@ -67,7 +67,8 @@ public class MainActivity extends AppCompatActivity {
 
                     @Override
                     public void exception(Call<ResponseBody> call, Throwable t) {
-
+                        Log.e("Test", t.getMessage());
+                        t.printStackTrace();
                     }
                 });
 
