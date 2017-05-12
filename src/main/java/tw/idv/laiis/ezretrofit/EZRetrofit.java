@@ -1,20 +1,14 @@
 package tw.idv.laiis.ezretrofit;
 
-import android.support.annotation.NonNull;
+import okhttp3.Interceptor;
+import okhttp3.JavaNetCookieJar;
+import okhttp3.OkHttpClient;
+import retrofit2.*;
 
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
-
-import okhttp3.Interceptor;
-import okhttp3.JavaNetCookieJar;
-import okhttp3.OkHttpClient;
-import retrofit2.Call;
-import retrofit2.CallAdapter;
-import retrofit2.Callback;
-import retrofit2.Converter;
-import retrofit2.Retrofit;
 
 /**
  * Created by laiis on 2017/4/28.
@@ -22,7 +16,6 @@ import retrofit2.Retrofit;
 
 public class EZRetrofit<T> {
 
-    @NonNull
     private static volatile Map<Class<?>, Retrofit> sRetrofitMap = Collections.synchronizedMap(new HashMap<Class<?>, Retrofit>());
     private static volatile RetrofitConf sRetrofitConf;
     private static volatile Retrofit.Builder sBuilder;
@@ -31,7 +24,7 @@ public class EZRetrofit<T> {
 
     }
 
-    public static void initial(@NonNull RetrofitConf retrofitConf) {
+    public static void initial(RetrofitConf retrofitConf) {
         synchronized (EZRetrofit.class) {
             sRetrofitMap.clear();
             sRetrofitConf = retrofitConf;
@@ -39,7 +32,7 @@ public class EZRetrofit<T> {
         }
     }
 
-    private static Retrofit.Builder build(@NonNull RetrofitConf retrofitConf) {
+    private static Retrofit.Builder build(RetrofitConf retrofitConf) {
         OkHttpClient client = null;
         OkHttpClient.Builder builder = new OkHttpClient.Builder();
 

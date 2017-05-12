@@ -4,26 +4,16 @@ package tw.idv.laiis.ezretrofit.managers;
  * Created by laiis on 2017/5/8.
  */
 
-import android.util.Log;
-
+import javax.net.ssl.TrustManager;
+import javax.net.ssl.TrustManagerFactory;
+import javax.net.ssl.X509TrustManager;
 import java.security.KeyStore;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.security.Principal;
-import java.security.cert.CertPath;
-import java.security.cert.CertPathValidator;
-import java.security.cert.CertificateException;
-import java.security.cert.CertificateFactory;
-import java.security.cert.PKIXParameters;
-import java.security.cert.X509Certificate;
+import java.security.cert.*;
 import java.util.Arrays;
 import java.util.List;
-
-import javax.net.ssl.TrustManager;
-import javax.net.ssl.TrustManagerFactory;
-import javax.net.ssl.X509TrustManager;
-
-import tw.idv.laiis.ezretrofit.BuildConfig;
 
 /**
  * ref : https://github.com/rfreedman/android-ssl/blob/master/src/main/java/com/chariotsolutions/example/http/CustomTrustManager.java <p>
@@ -56,9 +46,7 @@ public class EZRetrofitTrustManager implements X509TrustManager {
             }
 
         } catch (Exception e) {
-            if (BuildConfig.DEBUG) {
-                Log.e(TAG, "---> " + e.getMessage());
-            }
+            e.printStackTrace();
         }
     }
 
@@ -88,7 +76,6 @@ public class EZRetrofitTrustManager implements X509TrustManager {
         final String pinAsHex = bytesToHex(pin);
         for (String validPin : mPins) {
             boolean result = validPin.equalsIgnoreCase(pinAsHex);
-            Log.d(TAG, " ---> " + validPin + " == " + pinAsHex + " : " + result);
             if (result) {
                 return true;
             }
@@ -106,10 +93,10 @@ public class EZRetrofitTrustManager implements X509TrustManager {
      *
      * @param chain    the server's certificate chain
      * @param authType the authentication type based on the client certificate
-     * @throws java.security.cert.CertificateException
+     * @throws CertificateException
      */
     @Override
-    public void checkServerTrusted(X509Certificate[] chain, String authType) throws java.security.cert.CertificateException {
+    public void checkServerTrusted(X509Certificate[] chain, String authType) throws CertificateException {
         try {
             mX509TrustManager.checkServerTrusted(chain, authType);
         } catch (CertificateException originalException) {

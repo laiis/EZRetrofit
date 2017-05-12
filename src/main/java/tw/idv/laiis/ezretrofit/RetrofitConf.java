@@ -1,42 +1,21 @@
 package tw.idv.laiis.ezretrofit;
 
-import android.content.Context;
+import okhttp3.*;
+import retrofit2.CallAdapter;
+import retrofit2.Converter;
+import tw.idv.laiis.ezretrofit.managers.EZRetrofitTrustManager;
 
+import javax.net.SocketFactory;
+import javax.net.ssl.*;
 import java.net.CookieHandler;
 import java.net.Proxy;
 import java.net.ProxySelector;
 import java.security.GeneralSecurityException;
 import java.security.KeyStore;
 import java.security.SecureRandom;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.Executor;
 import java.util.concurrent.TimeUnit;
-
-import javax.net.SocketFactory;
-import javax.net.ssl.HostnameVerifier;
-import javax.net.ssl.KeyManager;
-import javax.net.ssl.SSLContext;
-import javax.net.ssl.SSLHandshakeException;
-import javax.net.ssl.SSLSocketFactory;
-import javax.net.ssl.TrustManager;
-import javax.net.ssl.X509TrustManager;
-
-import okhttp3.Authenticator;
-import okhttp3.Cache;
-import okhttp3.Call;
-import okhttp3.CertificatePinner;
-import okhttp3.ConnectionPool;
-import okhttp3.Dispatcher;
-import okhttp3.Dns;
-import okhttp3.Interceptor;
-import okhttp3.Protocol;
-import retrofit2.CallAdapter;
-import retrofit2.Converter;
-import tw.idv.laiis.ezretrofit.managers.EZRetrofitTrustManager;
 
 /**
  * Created by laiis on 2017/4/27.
@@ -44,7 +23,6 @@ import tw.idv.laiis.ezretrofit.managers.EZRetrofitTrustManager;
 
 public class RetrofitConf {
 
-    private Context mContext;
     private boolean isUseSSL;
     private String mProtocol;
     private String[] mCertPins;
@@ -76,8 +54,7 @@ public class RetrofitConf {
     private Executor mExecutor;
     private okhttp3.Call.Factory mOKHttp3Factory;
 
-    private RetrofitConf(Context context) {
-        this.mContext = context;
+    private RetrofitConf() {
         this.mInterceptorList = Collections.synchronizedList(new ArrayList<Interceptor>());
         this.mNetworkInterceptorList = Collections.synchronizedList(new ArrayList<Interceptor>());
         this.mWebserviceMap = Collections.synchronizedMap(new HashMap<Class<?>, String>());
@@ -332,12 +309,10 @@ public class RetrofitConf {
 
     public static class Builder {
 
-        private Context _Context;
         private RetrofitConf _RetrofitConf;
 
-        public Builder(Context context) {
-            this._Context = context;
-            this._RetrofitConf = new RetrofitConf(_Context);
+        public Builder() {
+            this._RetrofitConf = new RetrofitConf();
         }
 
         public RetrofitConf build() {
@@ -532,9 +507,7 @@ public class RetrofitConf {
                 this._TrustManager = new EZRetrofitTrustManager(keyStore, pins);
                 this._SslSocketFactory = getSSLSocketFactory(keyMgr, protocol, _TrustManager);
             } catch (Exception e) {
-                if (BuildConfig.DEBUG) {
-                    e.printStackTrace();
-                }
+                e.printStackTrace();
             }
         }
 

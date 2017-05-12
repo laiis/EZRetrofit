@@ -1,23 +1,11 @@
 package tw.idv.laiis.ezretrofit.cookies;
 
-import android.content.SharedPreferences;
-import android.text.TextUtils;
-import android.util.Log;
-
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
+import java.io.*;
 import java.net.CookieStore;
 import java.net.HttpCookie;
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Locale;
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
@@ -35,22 +23,22 @@ public class PersistentCookieStore implements CookieStore {
     private static final String COOKIE_NAME_PREFIX = "cookie_";
 
     private final HashMap<String, ConcurrentHashMap<String, HttpCookie>> cookies;
-    private final SharedPreferences cookiePrefs;
+    private final CookieStoreRepo mCookieStoreRepo;
 
     /**
      * Construct a persistent cookie store.
      */
-    public PersistentCookieStore(SharedPreferences sharedPref) {
-        cookiePrefs = sharedPref;
+    public PersistentCookieStore(CookieStoreRepo cookieStoreRepo) {
+        mCookieStoreRepo = cookieStoreRepo;
         cookies = new HashMap<>();
 
         // Load any previously stored cookies into the store
-        Map<String, ?> prefsMap = cookiePrefs.getAll();
+        Map<String, ?> prefsMap = mCookieStoreRepo.getAll();
         for (Map.Entry<String, ?> entry : prefsMap.entrySet()) {
             if (entry.getValue() instanceof String && ((String) entry.getValue()) != null && !((String) entry.getValue()).startsWith(COOKIE_NAME_PREFIX)) {
-                String[] cookieNames = TextUtils.split((String) entry.getValue(), ",");
+                String[] cookieNames = ((String) entry.getValue()).split(",");
                 for (String name : cookieNames) {
-                    String encodedCookie = cookiePrefs.getString(COOKIE_NAME_PREFIX + name, null);
+                    String encodedCookie = mCookieStoreRepo.getString(COOKIE_NAME_PREFIX + name, null);
                     if (encodedCookie != null) {
                         HttpCookie decodedCookie = decodeCookie(encodedCookie);
                         if (decodedCookie != null) {
@@ -81,10 +69,22 @@ public class PersistentCookieStore implements CookieStore {
         }
 
         // Save cookie into persistent store
-        SharedPreferences.Editor prefsWriter = cookiePrefs.edit();
-        prefsWriter.putString(cookie.getDomain(), TextUtils.join(",", cookies.get(cookie.getDomain()).keySet()));
-        prefsWriter.putString(COOKIE_NAME_PREFIX + cookie.getName(), encodeCookie(new SerializableHttpCookie(cookie)));
-        prefsWriter.commit();
+        mCookieStoreRepo.putString(cookie.getDomain(), join(",", cookies.get(cookie.getDomain()).keySet()));
+        mCookieStoreRepo.putString(COOKIE_NAME_PREFIX + cookie.getName(), encodeCookie(new SerializableHttpCookie(cookie)));
+        mCookieStoreRepo.flush();
+    }
+
+    private String join(String seperator, Set<String> keySet) {
+        StringBuffer sb = new StringBuffer();
+        for (Iterator<String> iterator = keySet.iterator(); iterator.hasNext(); ) {
+            boolean hasNext = iterator.hasNext();
+            sb.append(iterator.next());
+            if (hasNext) {
+                sb.append(",");
+            }
+        }
+
+        return sb.toString();
     }
 
     protected String getCookieToken(URI uri, HttpCookie cookie) {
@@ -104,9 +104,8 @@ public class PersistentCookieStore implements CookieStore {
 
     @Override
     public boolean removeAll() {
-        SharedPreferences.Editor prefsWriter = cookiePrefs.edit();
-        prefsWriter.clear();
-        prefsWriter.commit();
+        mCookieStoreRepo.clear();
+        mCookieStoreRepo.flush();
         cookies.clear();
         return true;
     }
@@ -119,12 +118,11 @@ public class PersistentCookieStore implements CookieStore {
         if (cookies.containsKey(uri.getHost()) && cookies.get(uri.getHost()).containsKey(name)) {
             cookies.get(uri.getHost()).remove(name);
 
-            SharedPreferences.Editor prefsWriter = cookiePrefs.edit();
-            if (cookiePrefs.contains(COOKIE_NAME_PREFIX + name)) {
-                prefsWriter.remove(COOKIE_NAME_PREFIX + name);
+            if (mCookieStoreRepo.contains(COOKIE_NAME_PREFIX + name)) {
+                mCookieStoreRepo.remove(COOKIE_NAME_PREFIX + name);
             }
-            prefsWriter.putString(uri.getHost(), TextUtils.join(",", cookies.get(uri.getHost()).keySet()));
-            prefsWriter.commit();
+            mCookieStoreRepo.putString(uri.getHost(), join(",", cookies.get(uri.getHost()).keySet()));
+            mCookieStoreRepo.flush();
 
             return true;
         }
@@ -149,7 +147,7 @@ public class PersistentCookieStore implements CookieStore {
             try {
                 ret.add(new URI(key));
             } catch (URISyntaxException e) {
-                Log.d(TAG, " ---> " + e);
+
             }
         }
 
@@ -171,7 +169,6 @@ public class PersistentCookieStore implements CookieStore {
             ObjectOutputStream outputStream = new ObjectOutputStream(os);
             outputStream.writeObject(cookie);
         } catch (IOException e) {
-            Log.d(TAG, "IOException in encodeCookie", e);
             return null;
         }
 
@@ -192,9 +189,9 @@ public class PersistentCookieStore implements CookieStore {
             ObjectInputStream objectInputStream = new ObjectInputStream(byteArrayInputStream);
             cookie = ((SerializableHttpCookie) objectInputStream.readObject()).getCookie();
         } catch (IOException e) {
-            Log.d(TAG, "IOException in decodeCookie", e);
+
         } catch (ClassNotFoundException e) {
-            Log.d(TAG, "ClassNotFoundException in decodeCookie", e);
+
         }
 
         return cookie;

@@ -1,13 +1,12 @@
 package tw.idv.laiis.ezretrofit;
 
-import android.util.Log;
+
+import retrofit2.Call;
+import retrofit2.Callback;
 
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
-
-import retrofit2.Call;
-import retrofit2.Callback;
 
 
 /**
@@ -104,8 +103,6 @@ final class CallManager {
         for (String tag : mCallMap.keySet()) {
             sb.append("\ntag :\t" + tag);
         }
-
-        Log.d(TAG, " ---> " + sb.toString());
     }
 
     public int requestAmount() {
