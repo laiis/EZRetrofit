@@ -1,7 +1,17 @@
 apply plugin: 'java'
+apply plugin: 'eclipse'
+
+sourceCompatibility = 1.8
+targetCompatibility = 1.8
+
+jar {
+    version '0.0.3'
+    baseName 'EZRetrofit'
+
+}
 
 repositories {
-    jcenter()
+    mavenCentral()
 }
 
 dependencies {
@@ -18,16 +28,12 @@ dependencies {
 
 buildscript {
     repositories {
-        jcenter()
+        mavenCentral()
     }
 }
 
 allprojects {
     repositories {
-        jcenter()
+        mavenCentral()
     }
 }
-
-//task clean(type: Delete) {
-//    delete rootProject.buildDir
-//}
