@@ -66,7 +66,6 @@
 -keep class okhttp3.** { *;}
 
 -dontwarn tw.idv.laiis.ezretrofit.**
--keep class tw.idv.laiis.ezretrofit.CallManager { *; }
 -keep class tw.idv.laiis.ezretrofit.EZCallback { *; }
 -keep class tw.idv.laiis.ezretrofit.EZRetrofit { *; }
 -keep class tw.idv.laiis.ezretrofit.EZRetrofit$* { *; }

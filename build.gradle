@@ -1,13 +1,15 @@
 apply plugin: 'java'
 apply plugin: 'eclipse'
+apply plugin: MyCustomPlugin
 
 sourceCompatibility = 1.7
 targetCompatibility = 1.7
 
 jar {
-    version '0.0.6'
+    version "0.0.7"
     baseName 'EZRetrofit'
 }
+
 
 repositories {
     mavenCentral()
@@ -41,9 +43,29 @@ allprojects {
     }
 }
 
-task proguard(type: proguard.gradle.ProGuardTask) {
-    configuration 'proguard-rules.pro'
+task jar(type: Jar, overwrite: true) {
+    doLast {
+        project.proguard.execute()
+    }
+}
 
-    injars 'build/libs/EZRetrofit-0.0.6.jar'
-    outjars 'build/libs/EZRetrofit-0.0.6-proguard.jar'
+//task proguard(type: proguard.gradle.ProGuardTask) {
+//    configuration 'proguard-rules.pro'
+//
+//    injars 'build/libs/EZRetrofit-0.0.6.jar'
+//    outjars 'build/libs/EZRetrofit-0.0.6-proguard.jar'
+//}
+
+
+class MyCustomPlugin implements Plugin<Project> {
+
+    void apply(Project project) {
+        project.tasks.create("proguard", proguard.gradle.ProGuardTask.class) {
+            configuration 'proguard-rules.pro'
+
+            injars "build/libs/EZRetrofit-0.0.7.jar"
+            outjars "build/libs/EZRetrofit-0.0.7-proguard.jar"
+        }
+    }
+
 }

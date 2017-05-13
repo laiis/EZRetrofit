@@ -1,1 +1,1 @@
-include(':EZRetrofit', ':Demo')
+include(':Demo')

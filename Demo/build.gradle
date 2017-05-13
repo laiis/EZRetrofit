@@ -12,5 +12,5 @@ dependencies {
     compile fileTree(dir: 'libs', include: ['*.jar'])
     testCompile 'junit:junit:4.12'
 
-    compile 'com.github.laiis:EZRetrofit:0.0.5'
+    compile 'com.github.laiis:EZRetrofit:0.0.6'
 }
