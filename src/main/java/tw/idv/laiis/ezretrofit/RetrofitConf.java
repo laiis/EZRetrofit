@@ -1,5 +1,6 @@
 package tw.idv.laiis.ezretrofit;
 
+import okhttp3.*;
 import retrofit2.CallAdapter;
 import retrofit2.Converter;
 import tw.idv.laiis.ezretrofit.managers.EZRetrofitTrustManager;

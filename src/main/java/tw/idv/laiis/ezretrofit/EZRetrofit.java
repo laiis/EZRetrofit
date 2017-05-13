@@ -3,6 +3,7 @@ package tw.idv.laiis.ezretrofit;
 import okhttp3.Interceptor;
 import okhttp3.JavaNetCookieJar;
 import okhttp3.OkHttpClient;
+import retrofit2.*;
 
 import java.util.Collections;
 import java.util.HashMap;
