@@ -4,7 +4,3 @@ apply plugin: 'java'
 repositories {
     mavenCentral()
 }
-
-dependencies {
-
-}
