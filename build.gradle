@@ -5,7 +5,7 @@ sourceCompatibility = 1.7
 targetCompatibility = 1.7
 
 jar {
-    version '0.0.3'
+    version '0.0.5'
     baseName 'EZRetrofit'
 
 }
