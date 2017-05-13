@@ -52,7 +52,7 @@ public class RetrofitConf {
     private List<Converter.Factory> mConverterFactoryList;
     private boolean isValidateEagerly;
     private Executor mExecutor;
-    private okhttp3.Call.Factory mOKHttp3Factory;
+    private Call.Factory mOKHttp3Factory;
 
     private RetrofitConf() {
         this.mInterceptorList = Collections.synchronizedList(new ArrayList<Interceptor>());
