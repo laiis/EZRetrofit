@@ -44,6 +44,6 @@ allprojects {
 task proguard(type: proguard.gradle.ProGuardTask) {
     configuration 'proguard-rules.pro'
 
-    injars 'build/libs/EZRetrofit-0.0.5.jar'
-    outjars 'build/libs/EZRetrofit-0.0.5-proguard.jar'
+    injars 'build/libs/EZRetrofit-0.0.6.jar'
+    outjars 'build/libs/EZRetrofit-0.0.6-proguard.jar'
 }
