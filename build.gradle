@@ -7,7 +7,7 @@ targetCompatibility = 1.7
 
 jar {
     version "0.0.7"
-    baseName 'EZRetrofit'
+    baseName 'EZRetrofitlib'
 }
 
 
@@ -46,8 +46,8 @@ allprojects {
 task jar(type: Jar, overwrite: true) {
     doLast {
         project.proguard.execute()
-        file('build/libs/EZRetrofit-0.0.7.jar').delete()
-        file('build/libs/EZRetrofit-0.0.7-proguard.jar').renameTo('build/libs/EZRetrofit-0.0.7.jar')
+//        file('build/libs/EZRetrofit-0.0.7.jar').delete()
+//        file('build/libs/EZRetrofit-0.0.7-proguard.jar').renameTo('build/libs/EZRetrofit-0.0.7.jar')
     }
 }
 
@@ -65,8 +65,8 @@ class MyCustomPlugin implements Plugin<Project> {
         project.tasks.create("proguard", proguard.gradle.ProGuardTask.class) {
             configuration 'proguard-rules.pro'
 
-            injars "build/libs/EZRetrofit-0.0.7.jar"
-            outjars "build/libs/EZRetrofit-0.0.7-proguard.jar"
+            injars "build/libs/EZRetrofitlib-0.0.7.jar"
+            outjars "build/libs/EZRetrofit-0.0.7.jar"
         }
     }
 
