@@ -6,7 +6,6 @@ import java.net.HttpCookie;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.*;
-import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * author: <a href="http://www.jiechic.com" target="_blank">jiechic</a> on 15/5/27.<br/>
@@ -22,7 +21,7 @@ public class PersistentCookieStore implements CookieStore {
     private static final String TAG = "TAG_COOKIESTORE";
     private static final String COOKIE_NAME_PREFIX = "cookie_";
 
-    private final HashMap<String, ConcurrentHashMap<String, HttpCookie>> cookies;
+    private final HashMap<String, HashMap<String, HttpCookie>> cookies;
     private final CookieStoreRepo mCookieStoreRepo;
 
     /**
@@ -43,7 +42,7 @@ public class PersistentCookieStore implements CookieStore {
                         HttpCookie decodedCookie = decodeCookie(encodedCookie);
                         if (decodedCookie != null) {
                             if (!cookies.containsKey(entry.getKey())) {
-                                cookies.put(entry.getKey(), new ConcurrentHashMap<String, HttpCookie>());
+                                cookies.put(entry.getKey(), new HashMap<String, HttpCookie>());
                             }
                             cookies.get(entry.getKey()).put(name, decodedCookie);
                         }
@@ -59,7 +58,7 @@ public class PersistentCookieStore implements CookieStore {
         // Save cookie into local store, or remove if expired
         if (!cookie.hasExpired()) {
             if (!cookies.containsKey(cookie.getDomain())) {
-                cookies.put(cookie.getDomain(), new ConcurrentHashMap<String, HttpCookie>());
+                cookies.put(cookie.getDomain(), new HashMap<String, HttpCookie>());
             }
             cookies.get(cookie.getDomain()).put(cookie.getName(), cookie);
         } else {
