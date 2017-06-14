@@ -208,6 +208,13 @@ public class EZRetrofit<T> {
         return helper;
     }
 
+    public static <T> T create(Class<T> cls) {
+        checkInitialStatus();
+        EZRetrofitHelper<T> helper = new EZRetrofitHelper<T>(sRetrofitConf);
+        helper.setRetrofitMap(sRetrofitMap);
+        return helper.webservice(cls);
+    }
+
     public static class EZRetrofitHelper<T> {
 
         private RetrofitConf _RetrofitConf;
