@@ -7,7 +7,6 @@ import tw.idv.laiis.ezretrofit.managers.EZRetrofitTrustManager;
 
 import javax.net.SocketFactory;
 import javax.net.ssl.*;
-import java.net.CookieHandler;
 import java.net.Proxy;
 import java.net.ProxySelector;
 import java.security.GeneralSecurityException;
@@ -27,7 +26,7 @@ public class RetrofitConf {
     private String mProtocol;
     private String[] mCertPins;
     private long mTimeout = 15L; // default
-    private CookieHandler mCookieHandler;
+    private CookieJar mCookieJar;
     private List<Interceptor> mInterceptorList;
     private List<Interceptor> mNetworkInterceptorList;
     private CertificatePinner mCertificatePinner;
@@ -63,12 +62,12 @@ public class RetrofitConf {
         this.mConverterFactoryList = Collections.synchronizedList(new ArrayList<Converter.Factory>());
     }
 
-    public void setCookieHandler(CookieHandler cookieHandler) {
-        this.mCookieHandler = cookieHandler;
+    public void setCookieJar(CookieJar cookieJar) {
+        this.mCookieJar = cookieJar;
     }
 
-    public CookieHandler getCookieHandler() {
-        return mCookieHandler;
+    public CookieJar getCookieJar() {
+        return mCookieJar;
     }
 
     public void enableSSLConnection() {
@@ -343,8 +342,8 @@ public class RetrofitConf {
             return this;
         }
 
-        public Builder setCookieHandler(CookieHandler cookieHandler) {
-            _RetrofitConf.setCookieHandler(cookieHandler);
+        public Builder setCookieJar(CookieJar cookieJar) {
+            _RetrofitConf.setCookieJar(cookieJar);
             return this;
         }
 

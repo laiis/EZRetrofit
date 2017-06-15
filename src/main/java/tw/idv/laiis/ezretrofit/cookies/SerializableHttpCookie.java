@@ -1,10 +1,11 @@
 package tw.idv.laiis.ezretrofit.cookies;
 
+import okhttp3.Cookie;
+
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.Serializable;
-import java.net.HttpCookie;
 
 /**
  * author: <a href="http://www.jiechic.com" target="_blank">jiechic</a> on 15/5/27.<br/>
@@ -13,47 +14,51 @@ import java.net.HttpCookie;
 @SuppressWarnings("serial")
 public class SerializableHttpCookie implements Serializable {
 
-    private transient final HttpCookie mCookie;
-    private transient HttpCookie mClientCookie;
+    private transient final Cookie cookie;
+    private transient Cookie clientCookie;
 
-    public SerializableHttpCookie(HttpCookie cookie) {
-        this.mCookie = cookie;
+    public SerializableHttpCookie(Cookie cookie) {
+        this.cookie = cookie;
     }
 
-    public HttpCookie getCookie() {
-        HttpCookie bestCookie = mCookie;
-        if (mClientCookie != null) {
-            bestCookie = mClientCookie;
+    public Cookie getCookie() {
+        Cookie bestCookie = cookie;
+        if (clientCookie != null) {
+            bestCookie = clientCookie;
         }
         return bestCookie;
     }
 
     private void writeObject(ObjectOutputStream out) throws IOException {
-        out.writeObject(mCookie.getName());
-        out.writeObject(mCookie.getValue());
-        out.writeObject(mCookie.getComment());
-        out.writeObject(mCookie.getCommentURL());
-        out.writeObject(mCookie.getDomain());
-        out.writeLong(mCookie.getMaxAge());
-        out.writeObject(mCookie.getPath());
-        out.writeObject(mCookie.getPortlist());
-        out.writeInt(mCookie.getVersion());
-        out.writeBoolean(mCookie.getSecure());
-        out.writeBoolean(mCookie.getDiscard());
+        out.writeObject(cookie.name());
+        out.writeObject(cookie.value());
+        out.writeLong(cookie.expiresAt());
+        out.writeObject(cookie.domain());
+        out.writeObject(cookie.path());
+        out.writeBoolean(cookie.secure());
+        out.writeBoolean(cookie.httpOnly());
+        out.writeBoolean(cookie.hostOnly());
+        out.writeBoolean(cookie.persistent());
     }
 
     private void readObject(ObjectInputStream in) throws IOException, ClassNotFoundException {
         String name = (String) in.readObject();
         String value = (String) in.readObject();
-        mClientCookie = new HttpCookie(name, value);
-        mClientCookie.setComment((String) in.readObject());
-        mClientCookie.setCommentURL((String) in.readObject());
-        mClientCookie.setDomain((String) in.readObject());
-        mClientCookie.setMaxAge(in.readLong());
-        mClientCookie.setPath((String) in.readObject());
-        mClientCookie.setPortlist((String) in.readObject());
-        mClientCookie.setVersion(in.readInt());
-        mClientCookie.setSecure(in.readBoolean());
-        mClientCookie.setDiscard(in.readBoolean());
+        long expiresAt = in.readLong();
+        String domain = (String) in.readObject();
+        String path = (String) in.readObject();
+        boolean secure = in.readBoolean();
+        boolean httpOnly = in.readBoolean();
+        boolean hostOnly = in.readBoolean();
+        boolean persistent = in.readBoolean();
+        Cookie.Builder builder = new Cookie.Builder();
+        builder = builder.name(name);
+        builder = builder.value(value);
+        builder = builder.expiresAt(expiresAt);
+        builder = hostOnly ? builder.hostOnlyDomain(domain) : builder.domain(domain);
+        builder = builder.path(path);
+        builder = secure ? builder.secure() : builder;
+        builder = httpOnly ? builder.httpOnly() : builder;
+        clientCookie = builder.build();
     }
 }

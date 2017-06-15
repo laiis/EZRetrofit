@@ -1,7 +1,6 @@
 package tw.idv.laiis.ezretrofit;
 
 import okhttp3.Interceptor;
-import okhttp3.JavaNetCookieJar;
 import okhttp3.OkHttpClient;
 import retrofit2.*;
 
@@ -48,8 +47,8 @@ public class EZRetrofit<T> {
             builder.authenticator(retrofitConf.getAuthenticator());
         }
 
-        if (retrofitConf.getCookieHandler() != null) {
-            builder.cookieJar(new JavaNetCookieJar(retrofitConf.getCookieHandler()));
+        if (retrofitConf.getCookieJar() != null) {
+            builder.cookieJar(retrofitConf.getCookieJar());
         }
 
         if (retrofitConf.getProtocols() != null && retrofitConf.getProtocols().size() > 0) {

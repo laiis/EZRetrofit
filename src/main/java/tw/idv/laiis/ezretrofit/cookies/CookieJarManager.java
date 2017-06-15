@@ -4,23 +4,21 @@ import okhttp3.Cookie;
 import okhttp3.CookieJar;
 import okhttp3.HttpUrl;
 
-import java.net.CookieManager;
 import java.net.CookiePolicy;
-import java.net.CookieStore;
-import java.net.HttpCookie;
 import java.util.ArrayList;
 import java.util.List;
 
 /**
  * Created by laiis on 2017/6/14.
  */
-public class CookieJarManager extends CookieManager implements CookieJar {
+public class CookieJarManager implements CookieJar {
 
     private static volatile CookiePolicy cookiePolicy;
+    private PersistentCookieStore mCookieStore;
 
     public CookieJarManager(PersistentCookieStore store, CookiePolicy cookiePolicy) {
-        super(store, cookiePolicy);
         this.cookiePolicy = cookiePolicy;
+        this.mCookieStore = store;
     }
 
     @Override
@@ -29,17 +27,13 @@ public class CookieJarManager extends CookieManager implements CookieJar {
             return;
         }
 
-        CookieStore cookieStore = getCookieStore();
-        for (Cookie cookie : cookies) {
-            HttpCookie httpCookie = new HttpCookie(cookie.name(), cookie.value());
-            httpCookie.setDomain(cookie.domain());
-            httpCookie.setMaxAge(cookie.expiresAt());
-            httpCookie.setSecure(cookie.secure());
-            httpCookie.setPath(cookie.path());
-            httpCookie.setHttpOnly(cookie.httpOnly());
-
-            if (cookiePolicy.shouldAccept(url.uri(), httpCookie)) {
-                cookieStore.add(url.uri(), httpCookie);
+        if (CookiePolicy.ACCEPT_ALL == cookiePolicy) {
+            mCookieStore.add(url, cookies);
+        } else {
+            for (Cookie cookie : cookies) {
+                if (cookie.matches(url)) {
+                    mCookieStore.add(url, cookies);
+                }
             }
         }
     }
@@ -50,31 +44,17 @@ public class CookieJarManager extends CookieManager implements CookieJar {
             return new ArrayList<>();
         }
 
-        CookieStore cookieStore = getCookieStore();
-        List<HttpCookie> httpCookies = cookieStore.get(url.uri());
-        List<Cookie> cookies = new ArrayList<>();
-        for (HttpCookie httpCookie : httpCookies) {
-            Cookie cookie = new Cookie.Builder()
-                    .domain(httpCookie.getDomain())
-                    .expiresAt(httpCookie.getMaxAge())
-                    .name(httpCookie.getName())
-                    .value(httpCookie.getValue())
-                    .path(httpCookie.getPath())
-                    .build();
-
-            if (httpCookie.isHttpOnly()) {
-                cookie.httpOnly();
+        if (CookiePolicy.ACCEPT_ALL == cookiePolicy) {
+            return mCookieStore.get(url);
+        } else {
+            List<Cookie> cookies = new ArrayList<>();
+            for (Cookie cookie : mCookieStore.get(url)) {
+                if (cookie.matches(url)) {
+                    cookies.add(cookie);
+                }
             }
 
-            if (httpCookie.getSecure()) {
-                cookie.secure();
-            }
-
-            if (cookiePolicy.shouldAccept(url.uri(), httpCookie)) {
-                cookies.add(cookie);
-            }
+            return cookies;
         }
-
-        return cookies;
     }
 }
