@@ -58,4 +58,9 @@ public class CookieJarManager extends CookieManager implements CookieJar {
             return cookies;
         }
     }
+
+    public PersistentCookieStore getPersistentCookieStore() {
+        return mCookieStore;
+    }
+
 }
