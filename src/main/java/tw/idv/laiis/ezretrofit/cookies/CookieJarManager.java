@@ -4,6 +4,7 @@ import okhttp3.Cookie;
 import okhttp3.CookieJar;
 import okhttp3.HttpUrl;
 
+import java.net.CookieManager;
 import java.net.CookiePolicy;
 import java.util.ArrayList;
 import java.util.List;
@@ -11,7 +12,7 @@ import java.util.List;
 /**
  * Created by laiis on 2017/6/14.
  */
-public class CookieJarManager implements CookieJar {
+public class CookieJarManager extends CookieManager implements CookieJar {
 
     private static volatile CookiePolicy cookiePolicy;
     private PersistentCookieStore mCookieStore;
