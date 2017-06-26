@@ -17,10 +17,9 @@ import java.util.*;
  */
 public class PersistentCookieStore {
 
-    private static final String TAG = "TAG_COOKIESTORE";
     private static final String COOKIE_NAME_PREFIX = "cookie_";
 
-    private final HashMap<String, Map<String, Cookie>> mCookies;
+    private final HashMap<Object, Map<String, Cookie>> mCookies;
     private final CookieStoreRepo mCookieStoreRepo;
 
     /**
@@ -30,8 +29,8 @@ public class PersistentCookieStore {
         mCookieStoreRepo = cookieStoreRepo;
         mCookies = new HashMap<>();//Load any previously stored cookies into the store
 
-        Map<String, ?> prefsMap = mCookieStoreRepo.getAll();
-        for (Map.Entry<String, ?> entry : prefsMap.entrySet()) {
+        Map<Object, ?> prefsMap = mCookieStoreRepo.getAll();
+        for (Map.Entry<Object, ?> entry : prefsMap.entrySet()) {
             if (null != entry.getValue() && !((String) entry.getValue()).startsWith(COOKIE_NAME_PREFIX)) {
                 String[] cookieNames = ((String) entry.getValue()).split(",");
                 for (String name : cookieNames) {
@@ -62,8 +61,6 @@ public class PersistentCookieStore {
     }
 
     private void add(Cookie cookie) {
-//        String name = getCookieToken(cookie);
-
         //Save cookie into local store, or remove if expired
         if (!mCookies.containsKey(cookie.domain()))
             mCookies.put(cookie.domain(), Collections.synchronizedMap(new HashMap<String, Cookie>()));
@@ -83,8 +80,8 @@ public class PersistentCookieStore {
 
     public List<Cookie> get(HttpUrl uri) {
         ArrayList<Cookie> ret = new ArrayList<>();
-        for (String key : mCookies.keySet()) {
-            if (uri.host().contains(key)) {
+        for (Object key : mCookies.keySet()) {
+            if (uri.host().contains(String.valueOf(key))) {
                 ret.addAll(mCookies.get(key).values());
             }
         }

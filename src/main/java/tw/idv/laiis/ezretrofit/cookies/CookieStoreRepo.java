@@ -7,7 +7,7 @@ import java.util.Map;
  */
 public interface CookieStoreRepo {
 
-    <T> Map<String, T> getAll();
+    <T> Map<Object, T> getAll();
 
     String getString(String key, String defValue);
 
