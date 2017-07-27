@@ -10,8 +10,15 @@ import retrofit2.Response;
 
 public abstract class EZCallback<T> implements Callback<T> {
 
+    private String mTag;
+
+    public EZCallback(String tag) {
+        this.mTag = tag;
+    }
+
     @Override
     public final void onResponse(Call<T> call, Response<T> response) {
+        CallManager.newInstance().dequeue(mTag);
         if (!response.isSuccessful()) {
             fail(call, response);
             return;
@@ -22,6 +29,7 @@ public abstract class EZCallback<T> implements Callback<T> {
 
     @Override
     public final void onFailure(Call<T> call, Throwable t) {
+        CallManager.newInstance().dequeue(mTag);
         exception(call, t);
     }
 
