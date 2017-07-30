@@ -215,7 +215,7 @@ public class RetrofitConf {
     }
 
     public void setHostnameVerifier(HostnameVerifier hostnameVerifier) {
-        this.mHostnameVerifier = mHostnameVerifier;
+        this.mHostnameVerifier = hostnameVerifier;
     }
 
     public void setPingInterval(PinInterval pingInterval) {
