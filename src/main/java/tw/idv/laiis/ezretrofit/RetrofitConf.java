@@ -3,6 +3,7 @@ package tw.idv.laiis.ezretrofit;
 import okhttp3.*;
 import retrofit2.CallAdapter;
 import retrofit2.Converter;
+import tw.idv.laiis.ezretrofit.managers.DefaultTestingTrustManager;
 import tw.idv.laiis.ezretrofit.managers.EZRetrofitTrustManager;
 
 import javax.net.SocketFactory;
@@ -495,19 +496,29 @@ public class RetrofitConf {
         private SSLSocketFactory _SslSocketFactory;
         private X509TrustManager _TrustManager;
 
-        public SSLSocketFactory getSSLSocketFactory(KeyManager keyMgr, String protocol, X509TrustManager trustManager) throws SSLHandshakeException, GeneralSecurityException {
-            SSLContext sslContext = SSLContext.getInstance(protocol);
-            sslContext.init(new KeyManager[]{keyMgr}, new TrustManager[]{trustManager}, SecureRandom.getInstance("SHA1PRNG"));
-            return sslContext.getSocketFactory();
-        }
 
         public SSLFactoryManager(String protocol, KeyManager keyMgr, KeyStore keyStore, String[] pins) {
             try {
-                this._TrustManager = new EZRetrofitTrustManager(keyStore, pins);
+                if (keyStore == null || pins == null) {
+                    this._TrustManager = new DefaultTestingTrustManager();
+                } else {
+                    this._TrustManager = new EZRetrofitTrustManager(keyStore, pins);
+                }
                 this._SslSocketFactory = getSSLSocketFactory(keyMgr, protocol, _TrustManager);
             } catch (Exception e) {
                 e.printStackTrace();
             }
+        }
+
+        public SSLSocketFactory getSSLSocketFactory(KeyManager keyMgr, String protocol, X509TrustManager trustManager) throws SSLHandshakeException, GeneralSecurityException {
+            KeyManager[] keyManagers = null;
+            if (keyMgr != null) {
+                keyManagers = new KeyManager[]{keyMgr};
+            }
+
+            SSLContext sslContext = SSLContext.getInstance(protocol);
+            sslContext.init(keyManagers, new TrustManager[]{trustManager}, SecureRandom.getInstance("SHA1PRNG"));
+            return sslContext.getSocketFactory();
         }
 
         public SSLSocketFactory getSslSocketFactory() {
