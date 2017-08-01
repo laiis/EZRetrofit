@@ -8,7 +8,7 @@ compileJava{
 }
 
 jar {
-    version "0.0.11"
+    version "0.0.13"
     baseName 'EZRetrofit'
 }
 
@@ -48,8 +48,8 @@ allprojects {
 task jar(type: Jar, overwrite: true) {
     doLast {
         project.useproguard.execute()
-        file('build/libs/EZRetrofit-0.0.11.jar').delete()
-        file('build/libs/EZRetrofit-0.0.11-proguard.jar').renameTo('build/libs/EZRetrofit-0.0.11.jar')
+        file('build/libs/EZRetrofit-0.0.13.jar').delete()
+        file('build/libs/EZRetrofit-0.0.13-proguard.jar').renameTo('build/libs/EZRetrofit-0.0.13.jar')
     }
 }
 
@@ -67,8 +67,8 @@ class MyCustomPlugin implements Plugin<Project> {
         project.tasks.create("useproguard", proguard.gradle.ProGuardTask.class) {
             configuration 'proguard-rules.pro'
 
-            injars "build/libs/EZRetrofit-0.0.11.jar"
-            outjars "build/libs/EZRetrofit-0.0.11-proguard.jar"
+            injars "build/libs/EZRetrofit-0.0.13.jar"
+            outjars "build/libs/EZRetrofit-0.0.13-proguard.jar"
         }
     }
 
