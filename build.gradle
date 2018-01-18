@@ -2,7 +2,7 @@ apply plugin: 'java'
 apply plugin: 'maven'
 apply plugin: MyCustomPlugin
 
-compileJava{
+compileJava {
     sourceCompatibility = 1.7
     targetCompatibility = 1.7
 }
