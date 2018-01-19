@@ -1,12 +1,11 @@
 package tw.idv.laiis.ezretrofit;
 
-import okhttp3.Interceptor;
-import okhttp3.OkHttpClient;
+import okhttp3.*;
 import retrofit2.*;
+import retrofit2.Call;
+import retrofit2.Callback;
 
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -108,15 +107,11 @@ public class EZRetrofit<T> {
             builder.socketFactory(retrofitConf.getSocketFactory());
         }
 
-
-        if (retrofitConf.isUseSSLConnection()) {
-
-            if (retrofitConf.getCertficatePinner() != null) {
-                builder.certificatePinner(retrofitConf.getCertficatePinner());
-            } else if (retrofitConf.getSSLFactoryManager() != null) {
-                RetrofitConf.SSLFactoryManager sslFactoryManager = retrofitConf.getSSLFactoryManager();
-                builder.sslSocketFactory(sslFactoryManager.getSslSocketFactory(), sslFactoryManager.getX509TrustManager());
-            }
+        if (retrofitConf.isUseSSLCertificatePinning()) {
+            builder.certificatePinner(retrofitConf.getCertficatePinner());
+        } else if (retrofitConf.isUseSSLFactoryManager()) {
+            RetrofitConf.SSLFactoryManager sslFactoryManager = retrofitConf.getSSLFactoryManager();
+            builder.sslSocketFactory(sslFactoryManager.getSslSocketFactory(), sslFactoryManager.getX509TrustManager());
         }
 
         client = builder.build();
@@ -244,6 +239,7 @@ public class EZRetrofit<T> {
 
             return retrofit.create(clsWebservice);
         }
+
 
     }
 }
