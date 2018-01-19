@@ -1,13 +1,14 @@
 package tw.idv.laiis.ezretrofit;
 
-import okhttp3.ConnectionSpec;
+import okhttp3.TlsVersion;
 
-import javax.net.ssl.SSLSocket;
-import javax.net.ssl.SSLSocketFactory;
+import javax.net.ssl.*;
 import java.io.IOException;
 import java.net.InetAddress;
 import java.net.Socket;
-import java.net.UnknownHostException;
+import java.security.KeyManagementException;
+import java.security.NoSuchAlgorithmException;
+import java.security.SecureRandom;
 
 /**
  * Enables TLS v1.2 when creating SSLSockets.
@@ -18,13 +19,14 @@ import java.net.UnknownHostException;
  * @link https://developer.android.com/reference/javax/net/ssl/SSLSocket.html
  * @see SSLSocketFactory
  */
-public class Tls12SocketFactory extends SSLSocketFactory {
-    private static final String[] ALL_TLSs = {"SSLv3", "TLSv1", "TLSv1.1", "TLSv1.2", "TLSv1.2"};
+public class SupportAllTlsSocketFactory extends SSLSocketFactory {
 
-    final SSLSocketFactory delegate;
+    private final SSLSocketFactory delegate;
+    private String[] currentSupportTls;
 
-    public Tls12SocketFactory(SSLSocketFactory base) {
+    public SupportAllTlsSocketFactory(String[] supportsTls, SSLSocketFactory base) {
         this.delegate = base;
+        currentSupportTls = supportsTls;
     }
 
     @Override
@@ -43,12 +45,12 @@ public class Tls12SocketFactory extends SSLSocketFactory {
     }
 
     @Override
-    public Socket createSocket(String host, int port) throws IOException, UnknownHostException {
+    public Socket createSocket(String host, int port) throws IOException {
         return patch(delegate.createSocket(host, port));
     }
 
     @Override
-    public Socket createSocket(String host, int port, InetAddress localHost, int localPort) throws IOException, UnknownHostException {
+    public Socket createSocket(String host, int port, InetAddress localHost, int localPort) throws IOException {
         return patch(delegate.createSocket(host, port, localHost, localPort));
     }
 
@@ -62,11 +64,11 @@ public class Tls12SocketFactory extends SSLSocketFactory {
         return patch(delegate.createSocket(address, port, localAddress, localPort));
     }
 
-    private Socket patch(Socket s) {
-        if (s instanceof SSLSocket) {
-            ((SSLSocket) s).setEnabledProtocols(ALL_TLSs);
-            ((SSLSocket) s).setEnabledCipherSuites(((SSLSocket) s).getSupportedCipherSuites());
+    private Socket patch(Socket socket) {
+        if (socket instanceof SSLSocket) {
+            ((SSLSocket) socket).setEnabledProtocols(currentSupportTls);
+            ((SSLSocket) socket).setEnabledCipherSuites(((SSLSocket) socket).getSupportedCipherSuites());
         }
-        return s;
+        return socket;
     }
 }
