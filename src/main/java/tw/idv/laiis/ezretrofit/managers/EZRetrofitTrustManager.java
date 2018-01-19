@@ -32,6 +32,10 @@ public class EZRetrofitTrustManager implements X509TrustManager {
     private X509TrustManager mX509TrustManager;
     private MessageDigest mMessageDigest;
 
+    public EZRetrofitTrustManager() throws NoSuchAlgorithmException {
+        this(null, null);
+    }
+
     public EZRetrofitTrustManager(KeyStore keyStore, String[] pins) throws NoSuchAlgorithmException {
         this.mKeyStore = keyStore;
         this.mPins = pins;
