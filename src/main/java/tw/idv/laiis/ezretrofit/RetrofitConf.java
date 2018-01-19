@@ -10,7 +10,6 @@ import javax.net.SocketFactory;
 import javax.net.ssl.*;
 import java.net.Proxy;
 import java.net.ProxySelector;
-import java.security.GeneralSecurityException;
 import java.security.KeyStore;
 import java.security.SecureRandom;
 import java.util.*;
@@ -23,6 +22,7 @@ import java.util.concurrent.TimeUnit;
 
 public class RetrofitConf {
 
+    @Deprecated
     private boolean isUseSSL;
     private String mProtocol;
     private String[] mCertPins;
@@ -53,6 +53,9 @@ public class RetrofitConf {
     private boolean isValidateEagerly;
     private Executor mExecutor;
     private Call.Factory mOKHttp3Factory;
+    private List<ConnectionSpec> mConnectionSpecList;
+    private boolean isUseSSLCertificatePinning;
+    private boolean isUseSSLFactoryManager;
 
     private RetrofitConf() {
         this.mInterceptorList = Collections.synchronizedList(new ArrayList<Interceptor>());
@@ -61,6 +64,7 @@ public class RetrofitConf {
         this.mProtocolList = Collections.synchronizedList(new ArrayList<Protocol>());
         this.mCallAdapterFactoryList = Collections.synchronizedList(new ArrayList<CallAdapter.Factory>());
         this.mConverterFactoryList = Collections.synchronizedList(new ArrayList<Converter.Factory>());
+        this.mConnectionSpecList = Collections.synchronizedList(new ArrayList<ConnectionSpec>());
     }
 
     public void setCookieJar(CookieJar cookieJar) {
@@ -71,14 +75,17 @@ public class RetrofitConf {
         return mCookieJar;
     }
 
+    @Deprecated
     public void enableSSLConnection() {
         isUseSSL = true;
     }
 
+    @Deprecated
     public void disableSSLConnection() {
         isUseSSL = false;
     }
 
+    @Deprecated
     public boolean isUseSSLConnection() {
         return isUseSSL;
     }
@@ -307,6 +314,30 @@ public class RetrofitConf {
         this.mOKHttp3Factory = okHttp3Factory;
     }
 
+    public List<ConnectionSpec> getConnectionSpecList() {
+        return mConnectionSpecList;
+    }
+
+    public void addConnectionSpecs(List<ConnectionSpec> connectionSpecList) {
+        this.mConnectionSpecList.addAll(connectionSpecList);
+    }
+
+    public void setUseSSLCertificatePinning(boolean useSSLCertificatePinning) {
+        this.isUseSSLCertificatePinning = useSSLCertificatePinning;
+    }
+
+    public boolean isUseSSLCertificatePinning() {
+        return isUseSSLCertificatePinning;
+    }
+
+    public void setUseSSLFactoryManager(boolean useSSLFactoryManager) {
+        this.isUseSSLFactoryManager = useSSLFactoryManager;
+    }
+
+    public boolean isUseSSLFactoryManager() {
+        return isUseSSLFactoryManager;
+    }
+
     public static class Builder {
 
         private RetrofitConf _RetrofitConf;
@@ -334,6 +365,7 @@ public class RetrofitConf {
             return this;
         }
 
+        @Deprecated
         public Builder setUsingSSL(boolean isUsingSSL) {
             if (isUsingSSL) {
                 _RetrofitConf.enableSSLConnection();
@@ -467,6 +499,21 @@ public class RetrofitConf {
             _RetrofitConf.setProtocol(protocol);
             return this;
         }
+
+        public Builder setConnectionSpecList(List<ConnectionSpec> connectionSpecList) {
+            _RetrofitConf.addConnectionSpecs(connectionSpecList);
+            return this;
+        }
+
+        public Builder setUseCertificatePinning(boolean useCertificatePinning) {
+            _RetrofitConf.setUseSSLCertificatePinning(useCertificatePinning);
+            return this;
+        }
+
+        public Builder setUseSSLFactoryManager(boolean useSSLFactoryManager) {
+            _RetrofitConf.setUseSSLFactoryManager(useSSLFactoryManager);
+            return this;
+        }
     }
 
     public static class PinInterval {
@@ -488,45 +535,123 @@ public class RetrofitConf {
         }
     }
 
-    /**
-     * 待驗證
-     */
     public static class SSLFactoryManager {
 
         private SSLSocketFactory _SslSocketFactory;
-        private X509TrustManager _TrustManager;
+        private X509TrustManager _X509TrustManager;
 
-
-        public SSLFactoryManager(String protocol, KeyManager keyMgr, KeyStore keyStore, String[] pins) {
-            try {
-                if (keyStore == null || pins == null) {
-                    this._TrustManager = new DefaultTestingTrustManager();
-                } else {
-                    this._TrustManager = new EZRetrofitTrustManager(keyStore, pins);
-                }
-                this._SslSocketFactory = getSSLSocketFactory(keyMgr, protocol, _TrustManager);
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
+        private SSLFactoryManager() {
+            _SslSocketFactory = null;
+            _X509TrustManager = null;
         }
 
-        public SSLSocketFactory getSSLSocketFactory(KeyManager keyMgr, String protocol, X509TrustManager trustManager) throws SSLHandshakeException, GeneralSecurityException {
-            KeyManager[] keyManagers = null;
-            if (keyMgr != null) {
-                keyManagers = new KeyManager[]{keyMgr};
-            }
+        public void setSslSocketFactory(SSLSocketFactory sslSocketFactory) {
+            this._SslSocketFactory = sslSocketFactory;
+        }
 
-            SSLContext sslContext = SSLContext.getInstance(protocol);
-            sslContext.init(keyManagers, new TrustManager[]{trustManager}, SecureRandom.getInstance("SHA1PRNG"));
-            return sslContext.getSocketFactory();
+        public void setX509TrustManager(X509TrustManager x509TrustManager) {
+            this._X509TrustManager = x509TrustManager;
+        }
+
+        public X509TrustManager getX509TrustManager() {
+            return _X509TrustManager;
         }
 
         public SSLSocketFactory getSslSocketFactory() {
             return _SslSocketFactory;
         }
 
-        public X509TrustManager getX509TrustManager() {
-            return _TrustManager;
+        public static class Builder {
+
+            private String[] _SupportProtocols;
+            private KeyManager[] _KeyMgrs;
+            private boolean _IsIgnoreSSLVerify;
+            private KeyStore _KeyStore;
+            private String[] _Pins;
+            private String _Algorithm;
+            private X509TrustManager _TrustMgr;
+            private TlsVersion _TlsVersion;
+
+            public Builder() {
+
+            }
+
+            public Builder setProtocol(TlsVersion tlsVersion) {
+                this._TlsVersion = tlsVersion;
+                return this;
+            }
+
+            public Builder setSupportProtocols(String[] supportProtocols) {
+                this._SupportProtocols = supportProtocols;
+                return this;
+            }
+
+            public Builder setKeyManagers(KeyManager[] keyManagers) {
+                this._KeyMgrs = keyManagers;
+                return this;
+            }
+
+            public Builder setTrustManager(X509TrustManager trustManager) {
+                this._TrustMgr = trustManager;
+                return this;
+            }
+
+            public Builder setIgnoreVerify(boolean isIgnoreSSLVerify) {
+                this._IsIgnoreSSLVerify = isIgnoreSSLVerify;
+                return this;
+            }
+
+            public Builder setKeyStore(KeyStore keyStore) {
+                this._KeyStore = keyStore;
+                return this;
+            }
+
+            public Builder setPins(String[] pins) {
+                this._Pins = pins;
+                return this;
+            }
+
+            public Builder setSecureRandomAlgorithm(String algorithm) {
+                this._Algorithm = algorithm;
+                return this;
+            }
+
+            public SSLFactoryManager build() {
+                try {
+                    X509TrustManager trustManager = null;
+
+                    if (_IsIgnoreSSLVerify) {
+                        trustManager = new DefaultTestingTrustManager();
+                    } else {
+                        trustManager = new EZRetrofitTrustManager(_KeyStore, _Pins);
+                        if (_TrustMgr != null) {
+                            trustManager = _TrustMgr;
+                        }
+                    }
+                    X509TrustManager[] x509TrustManagers = new X509TrustManager[]{trustManager};
+
+                    SecureRandom secureRandom = null;
+                    try {
+                        secureRandom = SecureRandom.getInstance(_Algorithm);
+                    } catch (Exception e) {
+                        secureRandom = new SecureRandom();
+                    }
+
+                    SSLContext sslContext = SSLContext.getInstance(_TlsVersion.javaName());
+                    sslContext.init(_KeyMgrs, x509TrustManagers, secureRandom);
+                    SupportAllTlsSocketFactory tls12SocketFactory = new SupportAllTlsSocketFactory(_SupportProtocols, sslContext.getSocketFactory());
+
+                    SSLFactoryManager sslFactoryManager = new SSLFactoryManager();
+                    sslFactoryManager.setSslSocketFactory(tls12SocketFactory);
+                    sslFactoryManager.setX509TrustManager(trustManager);
+                    return sslFactoryManager;
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+
+                return null;
+            }
         }
+
     }
 }
