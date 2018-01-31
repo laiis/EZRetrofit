@@ -190,42 +190,67 @@ public class EZRetrofit<T> {
 
     public static <T> EZRetrofitHelper<T> create(RetrofitConf retrofitConf) {
         checkInitialStatus();
-        EZRetrofitHelper<T> helper = new EZRetrofitHelper<T>(build(retrofitConf), retrofitConf);
-        helper.setRetrofitMap(sRetrofitMap);
+        EZRetrofitHelper<T> helper = EZRetrofitHelper.newInstance()
+                .setRetrofitBuilder(build(retrofitConf))
+                .setRetrofitConf(retrofitConf)
+                .setRetrofitMap(sRetrofitMap);
         return helper;
     }
 
     public static <T> EZRetrofitHelper<T> create() {
         checkInitialStatus();
-        EZRetrofitHelper<T> helper = new EZRetrofitHelper<T>(sRetrofitConf);
-        helper.setRetrofitMap(sRetrofitMap);
+        EZRetrofitHelper<T> helper = EZRetrofitHelper.newInstance()
+                .setRetrofitBuilder(sBuilder)
+                .setRetrofitConf(sRetrofitConf)
+                .setRetrofitMap(sRetrofitMap);
         return helper;
     }
 
     public static <T> T create(Class<T> cls) {
         checkInitialStatus();
-        EZRetrofitHelper<T> helper = new EZRetrofitHelper<T>(sRetrofitConf);
-        helper.setRetrofitMap(sRetrofitMap);
+        EZRetrofitHelper<T> helper = EZRetrofitHelper.newInstance()
+                .setRetrofitBuilder(sBuilder)
+                .setRetrofitConf(sRetrofitConf)
+                .setRetrofitMap(sRetrofitMap);
         return helper.webservice(cls);
     }
 
     public static class EZRetrofitHelper<T> {
 
+        private static volatile EZRetrofitHelper _sHelper;
         private RetrofitConf _RetrofitConf;
         private Retrofit.Builder _Builder;
         private Map<Class<?>, Retrofit> _RetrofitMap;
 
-        public EZRetrofitHelper(RetrofitConf conf) {
-            this(sBuilder, conf);
+        public static EZRetrofitHelper newInstance() {
+            if (_sHelper == null) {
+                synchronized (EZRetrofitHelper.class) {
+                    if (_sHelper == null) {
+                        _sHelper = new EZRetrofitHelper();
+                    }
+                }
+            }
+
+            return _sHelper;
         }
 
-        public EZRetrofitHelper(Retrofit.Builder builder, RetrofitConf conf) {
+        EZRetrofitHelper() {
+
+        }
+
+        public EZRetrofitHelper setRetrofitConf(RetrofitConf conf) {
             this._RetrofitConf = conf;
-            this._Builder = builder;
+            return this;
         }
 
-        public void setRetrofitMap(Map<Class<?>, Retrofit> retrofitMap) {
+        public EZRetrofitHelper setRetrofitBuilder(Retrofit.Builder builder) {
+            this._Builder = builder;
+            return this;
+        }
+
+        public EZRetrofitHelper setRetrofitMap(Map<Class<?>, Retrofit> retrofitMap) {
             this._RetrofitMap = retrofitMap;
+            return this;
         }
 
         public T webservice(Class<T> clsWebservice) {
