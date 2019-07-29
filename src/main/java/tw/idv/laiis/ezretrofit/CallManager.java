@@ -14,7 +14,6 @@ import java.util.Map;
  */
 final class CallManager {
 
-    private static final boolean IS_IN_DEBUG = false;
     private static final String TAG = CallManager.class.getName();
 
     private Map<String, Call> mCallMap;
@@ -93,7 +92,7 @@ final class CallManager {
     }
 
     private void showCallInMap() {
-        if (IS_IN_DEBUG) {
+        if (LibConfig.IS_DEBUG) {
             StringBuffer sb = new StringBuffer();
             sb.append("[ isRequestEmpty ] CallManager tag size: ");
             sb.append(String.valueOf(mCallMap.size()));
