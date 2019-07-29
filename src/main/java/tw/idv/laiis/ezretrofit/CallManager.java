@@ -14,22 +14,18 @@ import java.util.Map;
  */
 final class CallManager {
 
+    private static final boolean IS_IN_DEBUG = false;
     private static final String TAG = CallManager.class.getName();
-
-    private static volatile CallManager sCallManager;
 
     private Map<String, Call> mCallMap;
     private Map<String, RequestCounter> mCounterMap;
 
+    private static class InnerHelper {
+        public static volatile CallManager sCallManager = new CallManager();
+    }
+
     public static CallManager newInstance() {
-        if (sCallManager == null) {
-            synchronized (CallManager.class) {
-                if (sCallManager == null) {
-                    sCallManager = new CallManager();
-                }
-            }
-        }
-        return sCallManager;
+        return InnerHelper.sCallManager;
     }
 
     private CallManager() {
@@ -38,7 +34,7 @@ final class CallManager {
     }
 
     public void enqueue(String tag, Call call, Callback callback) {
-        synchronized (CallManager.class) {
+        synchronized (this) {
 
             if (!(tag == null || tag.length() == 0)) {
                 if (mCallMap.get(tag) == null) {
@@ -59,7 +55,7 @@ final class CallManager {
     }
 
     public void dequeue(String tag) {
-        synchronized (CallManager.class) {
+        synchronized (this) {
 
             mCallMap.remove(tag);
 
@@ -71,13 +67,12 @@ final class CallManager {
                 }
             }
 
-
             showCallInMap();
         }
     }
 
     public void cancel(String tag) {
-        synchronized (CallManager.class) {
+        synchronized (this) {
             if (mCallMap.get(tag) != null) {
                 mCallMap.get(tag).cancel();
                 dequeue(tag);
@@ -86,53 +81,61 @@ final class CallManager {
     }
 
     public void cancelAll() {
-        synchronized (CallManager.class) {
+        synchronized (this) {
             for (Call call : mCallMap.values()) {
                 call.cancel();
             }
 
             mCallMap.clear();
             mCounterMap.clear();
+
         }
     }
 
     private void showCallInMap() {
-        StringBuffer sb = new StringBuffer();
-        sb.append("[ isRequestEmpty ] CallManager tag size: ");
-        sb.append(String.valueOf(mCallMap.size()));
-        for (String tag : mCallMap.keySet()) {
-            sb.append("\ntag :\t" + tag);
+        if (IS_IN_DEBUG) {
+            StringBuffer sb = new StringBuffer();
+            sb.append("[ isRequestEmpty ] CallManager tag size: ");
+            sb.append(String.valueOf(mCallMap.size()));
+            for (String tag : mCallMap.keySet()) {
+                sb.append("\ntag :\t" + tag);
+            }
+            System.out.println(sb.toString());
         }
     }
 
     public int requestAmount() {
-        return mCallMap.size();
+        synchronized (this) {
+            return mCallMap.size();
+        }
     }
 
     public int requestAmount(String presenterName) {
-        if (mCounterMap.get(presenterName) != null) {
-            return mCounterMap.get(presenterName).getReqCount();
+        synchronized (this) {
+            if (mCounterMap.get(presenterName) != null) {
+                return mCounterMap.get(presenterName).getReqCount();
+            }
+            return 0;
         }
-        return 0;
     }
 
     public boolean isRequestEmpty() {
-        synchronized (CallManager.class) {
+        synchronized (this) {
             showCallInMap();
             return mCallMap.isEmpty();
         }
     }
 
     public boolean isRequestEmpty(String presenterName) {
-        synchronized (CallManager.class) {
+        synchronized (this) {
             showCallInMap();
             return !mCounterMap.containsKey(presenterName);
         }
     }
 
-    private static class RequestCounter {
+    private static final class RequestCounter {
 
-        private int reqCount;
+        private int reqCount = 0;
 
         public void increase() {
             reqCount++;

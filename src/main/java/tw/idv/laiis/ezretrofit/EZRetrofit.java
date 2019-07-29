@@ -18,12 +18,14 @@ public class EZRetrofit<T> {
     private static volatile RetrofitConf sRetrofitConf;
     private static volatile Retrofit.Builder sBuilder;
 
+    private static final Object obj = new Object();
+
     private EZRetrofit() {
 
     }
 
     public static void initial(RetrofitConf retrofitConf) {
-        synchronized (EZRetrofit.class) {
+        synchronized (obj) {
             sRetrofitMap.clear();
             sRetrofitConf = retrofitConf;
             sBuilder = build(retrofitConf);
@@ -188,6 +190,7 @@ public class EZRetrofit<T> {
         CallManager.newInstance().cancelAll();
     }
 
+    @SuppressWarnings("unchecked")
     public static <T> EZRetrofitHelper<T> create(RetrofitConf retrofitConf) {
         checkInitialStatus();
         EZRetrofitHelper<T> helper = EZRetrofitHelper.newInstance()
@@ -197,15 +200,16 @@ public class EZRetrofit<T> {
         return helper;
     }
 
+    @SuppressWarnings("unchecked")
     public static <T> EZRetrofitHelper<T> create() {
         checkInitialStatus();
-        EZRetrofitHelper<T> helper = EZRetrofitHelper.newInstance()
+        return (EZRetrofitHelper<T>) EZRetrofitHelper.newInstance()
                 .setRetrofitBuilder(sBuilder)
                 .setRetrofitConf(sRetrofitConf)
                 .setRetrofitMap(sRetrofitMap);
-        return helper;
     }
 
+    @SuppressWarnings("unchecked")
     public static <T> T create(Class<T> cls) {
         checkInitialStatus();
         EZRetrofitHelper<T> helper = EZRetrofitHelper.newInstance()
@@ -217,21 +221,16 @@ public class EZRetrofit<T> {
 
     public static class EZRetrofitHelper<T> {
 
-        private static volatile EZRetrofitHelper _sHelper;
         private RetrofitConf _RetrofitConf;
         private Retrofit.Builder _Builder;
         private Map<Class<?>, Retrofit> _RetrofitMap;
 
-        public static EZRetrofitHelper newInstance() {
-            if (_sHelper == null) {
-                synchronized (EZRetrofitHelper.class) {
-                    if (_sHelper == null) {
-                        _sHelper = new EZRetrofitHelper();
-                    }
-                }
-            }
+        private static final class InnerHelper {
+            public static volatile EZRetrofitHelper _sHelper = new EZRetrofitHelper();
+        }
 
-            return _sHelper;
+        public static EZRetrofitHelper newInstance() {
+            return InnerHelper._sHelper;
         }
 
         EZRetrofitHelper() {
@@ -264,7 +263,5 @@ public class EZRetrofit<T> {
 
             return retrofit.create(clsWebservice);
         }
-
-
     }
 }
