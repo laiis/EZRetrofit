@@ -1,10 +1,11 @@
 apply plugin: 'java'
+apply plugin: 'java-library'
 apply plugin: 'maven'
 apply plugin: MyCustomPlugin
 
 compileJava {
-    sourceCompatibility = 1.7
-    targetCompatibility = 1.7
+    sourceCompatibility = 1.8
+    targetCompatibility = 1.8
 }
 
 jar {
@@ -14,6 +15,8 @@ jar {
 
 
 repositories {
+    google()
+    jcenter()
     mavenCentral()
 }
 
@@ -21,16 +24,20 @@ dependencies {
     implementation fileTree(dir: 'libs', include: ['*.jar'])
     testImplementation 'junit:junit:4.12'
 
-    implementation 'com.squareup.retrofit2:retrofit:2.6.0'
-    implementation 'com.squareup.retrofit2:converter-gson:2.6.0'
+    api 'com.squareup.retrofit2:retrofit:2.6.0'
+    api 'com.squareup.retrofit2:converter-gson:2.6.0'
+    api 'com.squareup.retrofit2:adapter-rxjava2:2.6.0'
 
-    implementation 'com.squareup.okhttp3:okhttp:3.14.0'
-    implementation 'com.squareup.okhttp3:okhttp-urlconnection:3.14.0'
-    implementation 'com.squareup.okio:okio:2.2.2'
+    api 'com.squareup.okhttp3:okhttp:3.14.0'
+    api 'com.squareup.okhttp3:okhttp-urlconnection:3.14.0'
+    api 'com.squareup.okhttp3:logging-interceptor:3.14.0'
+    api 'com.squareup.okio:okio:2.2.2'
 }
 
 buildscript {
     repositories {
+        google()
+        jcenter()
         mavenCentral()
         flatDir dirs: './proguard/lib'
     }
@@ -41,6 +48,8 @@ buildscript {
 
 allprojects {
     repositories {
+        google()
+        jcenter()
         mavenCentral()
     }
 }
