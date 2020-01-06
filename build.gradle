@@ -1,19 +1,22 @@
 apply plugin: 'java'
+apply plugin: 'java-library'
 apply plugin: 'maven'
 apply plugin: MyCustomPlugin
 
 compileJava {
-    sourceCompatibility = 1.7
-    targetCompatibility = 1.7
+    sourceCompatibility = 1.8
+    targetCompatibility = 1.8
 }
 
 jar {
-    version "0.0.15"
+    version "0.0.16"
     baseName 'EZRetrofit'
 }
 
 
 repositories {
+    google()
+    jcenter()
     mavenCentral()
 }
 
@@ -21,16 +24,20 @@ dependencies {
     implementation fileTree(dir: 'libs', include: ['*.jar'])
     testImplementation 'junit:junit:4.12'
 
-    implementation 'com.squareup.retrofit2:retrofit:2.5.0'
-    implementation 'com.squareup.retrofit2:converter-gson:2.5.0'
+    api 'com.squareup.retrofit2:retrofit:2.5.0'
+    api 'com.squareup.retrofit2:converter-gson:2.5.0'
+    api 'com.squareup.retrofit2:adapter-rxjava2:2.5.0'
 
-    implementation 'com.squareup.okhttp3:okhttp:3.12.0'
-    implementation 'com.squareup.okhttp3:okhttp-urlconnection:3.12.0'
-    implementation 'com.squareup.okio:okio:2.1.0'
+    api 'com.squareup.okhttp3:okhttp:3.12.0'
+    api 'com.squareup.okhttp3:okhttp-urlconnection:3.12.0'
+    api 'com.squareup.okhttp3:logging-interceptor:3.12.0'
+    api 'com.squareup.okio:okio:2.1.0'
 }
 
 buildscript {
     repositories {
+        google()
+        jcenter()
         mavenCentral()
         flatDir dirs: './proguard/lib'
     }
@@ -41,6 +48,8 @@ buildscript {
 
 allprojects {
     repositories {
+        google()
+        jcenter()
         mavenCentral()
     }
 }
@@ -48,8 +57,8 @@ allprojects {
 task jar(type: Jar, overwrite: true) {
     doLast {
         project.useproguard.execute()
-        file('build/libs/EZRetrofit-0.0.15.jar').delete()
-        file('build/libs/EZRetrofit-0.0.15-proguard.jar').renameTo('build/libs/EZRetrofit-0.0.15.jar')
+        file('build/libs/EZRetrofit-0.0.16.jar').delete()
+        file('build/libs/EZRetrofit-0.0.16-proguard.jar').renameTo('build/libs/EZRetrofit-0.0.16.jar')
     }
 }
 
@@ -67,8 +76,8 @@ class MyCustomPlugin implements Plugin<Project> {
         project.tasks.create("useproguard", proguard.gradle.ProGuardTask.class) {
             configuration 'proguard-rules.pro'
 
-            injars "build/libs/EZRetrofit-0.0.15.jar"
-            outjars "build/libs/EZRetrofit-0.0.15-proguard.jar"
+            injars "build/libs/EZRetrofit-0.0.16.jar"
+            outjars "build/libs/EZRetrofit-0.0.16-proguard.jar"
         }
     }
 
