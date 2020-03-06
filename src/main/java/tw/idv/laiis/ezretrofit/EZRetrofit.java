@@ -156,18 +156,9 @@ public class EZRetrofit<T> {
         }
     }
 
-    public static void call(Object obj, Call call, Callback callback) {
+    public static void call(Call call, EZCallback ezCallback) {
         checkInitialStatus();
-        String tag = "";
-        if (obj != null) {
-            tag = obj.getClass().getName();
-        }
-
-        CallManager.newInstance().enqueue(tag, call, callback);
-    }
-
-    public static void call(Call call, Callback callback) {
-        call(null, call, callback);
+        CallManager.newInstance().enqueue(call, ezCallback);
     }
 
     public static int count() {
@@ -175,14 +166,14 @@ public class EZRetrofit<T> {
         return CallManager.newInstance().requestAmount();
     }
 
-    public static int count(Object obj) {
+    public static int count(String tag) {
         checkInitialStatus();
-        return CallManager.newInstance().requestAmount(obj.getClass().getName());
+        return CallManager.newInstance().requestAmount(tag);
     }
 
-    public static void stop(Object obj) {
+    public static void stop(String tag) {
         checkInitialStatus();
-        CallManager.newInstance().cancel(obj.getClass().getName());
+        CallManager.newInstance().cancel(tag);
     }
 
     public static void stopAll() {

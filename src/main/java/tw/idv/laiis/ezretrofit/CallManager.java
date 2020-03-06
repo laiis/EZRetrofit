@@ -32,9 +32,9 @@ final class CallManager {
         mCounterMap = Collections.synchronizedMap(new HashMap<String, RequestCounter>());
     }
 
-    public void enqueue(String tag, Call call, Callback callback) {
+    public void enqueue(Call call, EZCallback callback) {
         synchronized (this) {
-
+            String tag = callback.getTag();
             if (!(tag == null || tag.length() == 0)) {
                 if (mCallMap.get(tag) == null) {
                     mCallMap.put(tag, call);

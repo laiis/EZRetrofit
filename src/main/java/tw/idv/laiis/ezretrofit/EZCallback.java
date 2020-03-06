@@ -12,8 +12,15 @@ public abstract class EZCallback<T> implements Callback<T> {
 
     private String mTag;
 
+    public EZCallback() {
+    }
+
     public EZCallback(String tag) {
         this.mTag = tag;
+    }
+
+    public String getTag() {
+        return mTag;
     }
 
     @Override
