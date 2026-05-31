@@ -1,12 +1,13 @@
-# 工作記憶快照 (Turn 4)
-
-## 關鍵決策與進度摘要
-1. **問題診斷與修復**：
-   - 解決 JDK 21 下 `EZRetrofit` 因類型推導與泛型造成的編譯錯誤，調整介面與實作的泛型宣告。
-   - 將 API 實體建立與快取邏輯自 `EZRetrofit` 抽離，獨立至 `EZRetrofitHelper`，降低類別職責。
-   - 針對 `setLogger` 設計回退機制，確保在動態切換日誌處理器或無自訂日誌時，能安全回退至系統預設的 `System.out` 輸出，防止 `NullPointerException`。
-2. **測試與品質驗證**：
-   - 撰寫單元測試驗證 `EZRetrofitHelper` 的快取命中率與多執行緒安全性。
-   - 撰寫測試確保日誌回退機制在傳入 `null` 時能正確回復為預設日誌處理器。
-3. **後續規劃**：
-   - 持續遵循專案規範與測試驅動開發 (TDD) 原則，以確保後續重構階段的代碼品質與向後相容性。
+{
+  "timestamp": "2026-05-31T14:28:02+08:00",
+  "summary": [
+    "完成 CVE 偵測結果分析",
+    "決策升級 JUnit 至 6.1.0 版本",
+    "決策升級 OkHttp 至 4.12.0 (Java 實作) 並更新 Proguard 規則邊界",
+    "決策將 GzipSource 內部例外轉換為 IOException 以確保相容性",
+    "SC-002 設定建置退化量化門檻在 5% 以內"
+  ],
+  "variables": {
+    "evidence_code": "GLOBAL-EVIDENCE-005"
+  }
+}
