@@ -1,7 +1,14 @@
 apply plugin: 'java'
 apply plugin: 'java-library'
-apply plugin: 'maven'
+apply plugin: 'maven-publish'
+apply plugin: 'com.github.gmazzo.buildconfig'
 apply plugin: MyCustomPlugin
+
+buildConfig {
+    useJavaOutput()
+    packageName("tw.idv.laiis.ezretrofit")
+    buildConfigField("boolean", "DEBUG", "true") // This is set to true for now; in a full Android build it's configured based on debug/release variants.
+}
 
 compileJava {
     sourceCompatibility = 1.8
@@ -9,14 +16,13 @@ compileJava {
 }
 
 jar {
-    version "0.1.2"
-    baseName 'EZRetrofit'
+    archiveVersion = "0.1.2"
+    archiveBaseName = 'EZRetrofit'
 }
 
 
 repositories {
     google()
-    jcenter()
     mavenCentral()
 }
 
@@ -37,43 +43,37 @@ dependencies {
 buildscript {
     repositories {
         google()
-        jcenter()
         mavenCentral()
-        flatDir dirs: './proguard/lib'
+        gradlePluginPortal()
     }
     dependencies {
-        classpath ':proguard:'
+        classpath 'com.guardsquare:proguard-gradle:7.5.0'
+        classpath 'com.github.gmazzo.buildconfig:com.github.gmazzo.buildconfig.gradle.plugin:5.3.5'
     }
 }
 
 allprojects {
     repositories {
         google()
-        jcenter()
         mavenCentral()
     }
 }
 
-task jar(type: Jar, overwrite: true) {
+tasks.named('jar') {
+    finalizedBy 'useproguard'
+}
+
+tasks.named('useproguard') {
     doLast {
-        project.useproguard.execute()
         file('build/libs/EZRetrofit-0.1.2.jar').delete()
         file('build/libs/EZRetrofit-0.1.2-proguard.jar').renameTo('build/libs/EZRetrofit-0.1.2.jar')
     }
 }
 
-//task proguard(type: proguard.gradle.ProGuardTask) {
-//    configuration 'proguard-rules.pro'
-//
-//    injars 'build/libs/EZRetrofit-0.0.6.jar'
-//    outjars 'build/libs/EZRetrofit-0.0.6-proguard.jar'
-//}
-
-
 class MyCustomPlugin implements Plugin<Project> {
 
     void apply(Project project) {
-        project.tasks.create("useproguard", proguard.gradle.ProGuardTask.class) {
+        project.tasks.create("useproguard", proguard.gradle.ProGuardTask) {
             configuration 'proguard-rules.pro'
 
             injars "build/libs/EZRetrofit-0.1.2.jar"

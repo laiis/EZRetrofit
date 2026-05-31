@@ -254,3 +254,9 @@ google-services.json
 freeline.py
 freeline/
 freeline_project_description.json
+
+# Local agent & git hooks rules
+.githooks/
+AGENTS.md
+AGENTS_detail.md
+
