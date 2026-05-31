@@ -1,6 +1,6 @@
 package tw.idv.laiis.ezretrofit;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import okhttp3.Request;
 import okio.Timeout;
 import retrofit2.Call;
@@ -9,7 +9,7 @@ import retrofit2.Response;
 import java.io.IOException;
 import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicBoolean;
-import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.*;
 
 public class CallManagerTest {
 
@@ -67,7 +67,7 @@ public class CallManagerTest {
         executor.shutdown();
         executor.awaitTermination(5, TimeUnit.SECONDS);
 
-        assertFalse("Concurrent modification exception should not occur during concurrent cancelAll()", hasException.get());
+        assertFalse(hasException.get(), "Concurrent modification exception should not occur during concurrent cancelAll()");
     }
 
     private static class DummyCall implements Call<Object> {

@@ -1,8 +1,8 @@
 package tw.idv.laiis.ezretrofit.managers;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import tw.idv.laiis.ezretrofit.RetrofitConf;
-import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.*;
 
 public class SSLFactoryManagerTest {
 

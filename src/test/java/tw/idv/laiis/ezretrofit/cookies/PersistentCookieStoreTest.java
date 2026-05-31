@@ -2,22 +2,22 @@ package tw.idv.laiis.ezretrofit.cookies;
 
 import okhttp3.Cookie;
 import okhttp3.HttpUrl;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import tw.idv.laiis.ezretrofit.EZLogger;
 import tw.idv.laiis.ezretrofit.EZRetrofit;
 
 import java.util.*;
 import java.util.concurrent.atomic.AtomicBoolean;
 
-import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.*;
 
 public class PersistentCookieStoreTest {
 
     private PersistentCookieStore store;
     private MockCookieStoreRepo repo;
 
-    @Before
+    @BeforeEach
     public void setUp() {
         repo = new MockCookieStoreRepo();
         store = new PersistentCookieStore(repo);
@@ -69,7 +69,7 @@ public class PersistentCookieStoreTest {
 
         String joinedNames = repo.getString("example.com", null);
         assertNotNull(joinedNames);
-        assertFalse("Joined string should not end with comma: " + joinedNames, joinedNames.endsWith(","));
+        assertFalse(joinedNames.endsWith(","), "Joined string should not end with comma: " + joinedNames);
     }
 
     @Test
@@ -87,7 +87,7 @@ public class PersistentCookieStoreTest {
 
         new PersistentCookieStore(repo);
 
-        assertTrue("Should log warning when decoding corrupt cookie", warningLogged.get());
+        assertTrue(warningLogged.get(), "Should log warning when decoding corrupt cookie");
     }
 
     private static class MockCookieStoreRepo implements CookieStoreRepo {
