@@ -6,7 +6,7 @@
 
 **Status**: Draft
 
-**Input**: 依據 `build/reports/code_review.md` 修復 EZRetrofit 函式庫的安全性、執行緒安全、邏輯 bug 及程式碼品質問題。
+**Input**: 依據 `build/reports/code_review.md` 修復 EZRetrofit 函式庫的安全性、執行緒安全、邏輯錯誤及程式碼品質問題。
 
 ---
 
@@ -16,14 +16,14 @@
 
 函式庫使用者透過 `PersistentCookieStore` 管理 Cookie。當收到過期的 Cookie 時，庫應能正確地從記憶體與持久化儲存中移除它，而非讓過期 Cookie 繼續留存並被送出。
 
-**Why this priority**: Cookie 邏輯 bug 會導致過期驗證資訊持續送出伺服器，直接影響業務正確性與資安。
+**Why this priority**: Cookie 邏輯錯誤會導致過期驗證資訊持續送出伺服器，直接影響業務正確性與資安。
 
 **Independent Test**: 可在不依賴其他元件的情況下，單獨測試 `PersistentCookieStore` 收到已過期 Cookie 後，該 Cookie 不再出現於後續 `get()` 回傳值中。
 
 **Acceptance Scenarios**:
 
 1. **Given** 一個已存入的 Cookie，**When** 接收到同名但已過期的 Cookie，**Then** 該 Cookie 從記憶體 map 中移除，且後續請求不再攜帶此 Cookie。
-2. **Given** 多個 Cookie 存在同一 domain，**When** 其中一個過期被移除，**Then** 其他 Cookie 不受影響，仍正常回傳。
+2. **Given** 多個 Cookie 存在同一網域 (domain)，**When** 其中一個過期被移除，**Then** 其他 Cookie 不受影響，仍正常回傳。
 3. **Given** `join()` 將 cookie 名稱序列化為字串，**When** 序列化後，**Then** 字串格式為 `a,b,c`（不含尾端逗號）。
 
 ---
@@ -32,14 +32,14 @@
 
 函式庫使用者在 Android/多執行緒環境中，同時從不同執行緒呼叫 `EZRetrofit.create()` 或 `EZRetrofit.create(Class)`。每次呼叫皆應取得正確對應 baseUrl 的 Retrofit 服務實例，不受其他執行緒影響。
 
-**Why this priority**: Race condition 會導致服務實例使用錯誤的 baseUrl，造成不可預期的 API 呼叫失敗，且難以復現與除錯。
+**Why this priority**: 競爭危害 (Race condition) 會導致服務實例使用錯誤的 baseUrl，造成不可預期的 API 呼叫失敗，且難以複現與除錯。
 
 **Independent Test**: 可撰寫並行壓力測試，同時呼叫多個 `create(Class)` 並驗證每個服務實例的 baseUrl 正確對應其傳入的 Class。
 
 **Acceptance Scenarios**:
 
 1. **Given** 多個執行緒同時呼叫 `EZRetrofit.create(ClassA)` 與 `EZRetrofit.create(ClassB)`，**When** 各自取得服務實例，**Then** ClassA 的實例 baseUrl 為 ClassA 設定值，ClassB 亦然，兩者不混用。
-2. **Given** `EZRetrofit.initial()` 在執行緒 A 執行，**When** 執行緒 B 同時呼叫 `create()`，**Then** 不發生 NullPointerException 或錯誤的 conf 被讀取。
+2. **Given** `EZRetrofit.initial()` 在執行緒 A 執行，**When** 執行緒 B 同時呼叫 `create()`，**Then** 不發生 NullPointerException 或錯誤的設定被讀取。
 
 ---
 
@@ -64,12 +64,12 @@
 
 **Why this priority**: 若 `DefaultTestingTrustManager` 被用於正式環境，任何 TLS 攻擊（如 MITM）皆可得逞，屬高風險安全漏洞。
 
-**Independent Test**: 可單獨測試 `DefaultTestingTrustManager`：在 debug 模式下可正常運作；在 release/非 debug 模式下呼叫 `checkServerTrusted()` 時拋出明確例外。
+**Independent Test**: 可單獨測試 `DefaultTestingTrustManager`：在除錯 (debug) 模式下可正常運作；在發行 (release)/非除錯模式下呼叫 `checkServerTrusted()` 時拋出明確例外。
 
 **Acceptance Scenarios**:
 
-1. **Given** 函式庫在 debug 模式執行，**When** 使用 `DefaultTestingTrustManager`，**Then** TLS 驗證被跳過，連線正常建立（供測試使用）。
-2. **Given** 函式庫在非 debug 模式執行，**When** 嘗試使用 `DefaultTestingTrustManager`，**Then** 拋出含明確說明的例外，阻止連線建立。
+1. **Given** 函式庫在除錯模式執行，**When** 使用 `DefaultTestingTrustManager`，**Then** TLS 驗證被跳過，連線正常建立（供測試使用）。
+2. **Given** 函式庫在非除錯模式執行，**When** 嘗試使用 `DefaultTestingTrustManager`，**Then** 拋出含明確說明的例外，阻止連線建立。
 
 ---
 
@@ -88,7 +88,7 @@
 
 ---
 
-### Edge Cases
+## Edge Cases
 
 - 當 `EZRetrofit.initial()` 尚未被呼叫，使用者即呼叫 `create()` 時，應拋出清楚的說明例外（現有行為，需確保維持正確）。
 - 當 `mPins` 為 null 或空陣列時，`validateCertificatePin()` 不應拋出 NullPointerException。
@@ -103,14 +103,14 @@
 
 - **FR-001**: 函式庫必須正確移除過期 Cookie，移除時使用 Cookie 的 `name` 作為 key，而非 `domain`。
 - **FR-002**: `join()` 序列化 Cookie 名稱時，輸出結果不得包含尾端分隔符（如 `a,b,c` 而非 `a,b,c,`）。
-- **FR-003**: `EZRetrofitHelper` 每次被請求時必須回傳獨立實例，不得共用可變的 Singleton 狀態。
+- **FR-003**: `EZRetrofitHelper` 每次被請求時必須回傳獨立實例，不得共用可變的單例 (Singleton) 狀態。
 - **FR-004**: Certificate Pinning 驗證必須使用 SHA-256 雜湊演算法；不得接受 SHA-1 格式的 pin 值。
 - **FR-005**: `DefaultTestingTrustManager` 必須在非開發環境下拒絕所有連線並拋出明確例外；環境偵測依據為建構工具自動生成的 `BuildConfig.DEBUG` 旗標（透過 `com.github.gmazzo.buildconfig` 插件產生）；現有 `LibConfig` 類別須標記為 `@Deprecated` 並以 `BuildConfig` 取代。
 - **FR-006**: `SSLFactoryManager.build()` 在設定不完整或初始化失敗時，必須拋出例外而非回傳 `null`。
-- **FR-007**: 函式庫內部發生可復式警告事件（如 Cookie 解碼失敗）時，必須透過可插拔 Logger 介面將訊息輸出；空 catch 區塊需全面移除，不得静默忽略任何可復式錯誤。
+- **FR-007**: 函式庫內部發生可復式警告事件（如 Cookie 解碼失敗）時，必須透過可插拔 Logger 介面將訊息輸出；空 catch 區塊需全面移除，不得靜默忽略任何可復式錯誤。
 - **FR-011**: 函式庫必須提供 `EZLogger` 公開介面，包含至少 `warn(String tag, String message, Throwable t)` 方法；呼叫端可向 `EZRetrofit` 注入自訂實作；未注入時預設行為為輸出至 `System.err`。
 - **FR-008**: `CallManager` 中的 tag 空值判斷必須使用正向邏輯（`tag != null && !tag.isEmpty()`）。
-- **FR-009**: `SupportAllTlsSocketFactory` 啟用的 cipher suite 必須限定於 OkHttp `ConnectionSpec.MODERN_TLS` 所定義的清單；不得呼叫 `getSupportedCipherSuites()` 全量啟用。
+- **FR-009**: `SupportAllTlsSocketFactory` 啟用的密碼套件 (cipher suite) 必須限定於 OkHttp `ConnectionSpec.MODERN_TLS` 所定義的清單；不得呼叫 `getSupportedCipherSuites()` 全量啟用。
 - **FR-010**: 函式庫 API 的公開方法命名中不得包含拼寫錯誤（如 `getCertficatePinner` 應修正為 `getCertificatePinner`）；修正方式為新增正確拼寫的方法，同時保留舊方法名稱並標記 `@Deprecated`，以確保向後相容。
 
 ### Key Entities

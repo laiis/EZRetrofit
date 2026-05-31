@@ -67,7 +67,18 @@ public class SupportAllTlsSocketFactory extends SSLSocketFactory {
     private Socket patch(Socket socket) {
         if (socket instanceof SSLSocket) {
             ((SSLSocket) socket).setEnabledProtocols(currentSupportTls);
-            ((SSLSocket) socket).setEnabledCipherSuites(((SSLSocket) socket).getSupportedCipherSuites());
+            java.util.List<okhttp3.CipherSuite> modernSuites = okhttp3.ConnectionSpec.MODERN_TLS.cipherSuites();
+            if (modernSuites != null) {
+                java.util.List<String> enabledList = new java.util.ArrayList<>();
+                java.util.List<String> supportedList = java.util.Arrays.asList(((SSLSocket) socket).getSupportedCipherSuites());
+                for (okhttp3.CipherSuite suite : modernSuites) {
+                    String suiteName = suite.javaName();
+                    if (supportedList.contains(suiteName)) {
+                        enabledList.add(suiteName);
+                    }
+                }
+                ((SSLSocket) socket).setEnabledCipherSuites(enabledList.toArray(new String[0]));
+            }
         }
         return socket;
     }

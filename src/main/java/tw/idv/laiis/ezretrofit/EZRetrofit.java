@@ -14,14 +14,45 @@ import java.util.concurrent.TimeUnit;
 
 public class EZRetrofit<T> {
 
-    private static volatile Map<Class<?>, Retrofit> sRetrofitMap = Collections.synchronizedMap(new HashMap<Class<?>, Retrofit>());
+    private static volatile Map<Class<?>, Retrofit> sRetrofitMap = new java.util.concurrent.ConcurrentHashMap<>();
     private static volatile RetrofitConf sRetrofitConf;
     private static volatile Retrofit.Builder sBuilder;
+    private static volatile EZLogger sLogger = new EZLogger() {
+        @Override
+        public void warn(String tag, String message, Throwable t) {
+            System.err.println("[" + tag + "] " + message);
+            if (t != null) {
+                t.printStackTrace(System.err);
+            }
+        }
+    };
 
     private static final Object obj = new Object();
 
     private EZRetrofit() {
 
+    }
+
+    public static void setLogger(EZLogger logger) {
+        synchronized (obj) {
+            if (logger != null) {
+                sLogger = logger;
+            } else {
+                sLogger = new EZLogger() {
+                    @Override
+                    public void warn(String tag, String message, Throwable t) {
+                        System.err.println("[" + tag + "] " + message);
+                        if (t != null) {
+                            t.printStackTrace(System.err);
+                        }
+                    }
+                };
+            }
+        }
+    }
+
+    public static EZLogger getLogger() {
+        return sLogger;
     }
 
     public static void initial(RetrofitConf retrofitConf) {
@@ -110,7 +141,7 @@ public class EZRetrofit<T> {
         }
 
         if (retrofitConf.isUseSSLCertificatePinning()) {
-            builder.certificatePinner(retrofitConf.getCertficatePinner());
+            builder.certificatePinner(retrofitConf.getCertificatePinner());
         } else if (retrofitConf.isUseSSLFactoryManager()) {
             RetrofitConf.SSLFactoryManager sslFactoryManager = retrofitConf.getSSLFactoryManager();
             builder.sslSocketFactory(sslFactoryManager.getSslSocketFactory(), sslFactoryManager.getX509TrustManager());
@@ -152,7 +183,7 @@ public class EZRetrofit<T> {
 
     public static void checkInitialStatus() {
         if (!isInitial()) {
-            throw new RuntimeException("You must initial EZRetrofit before you using it.");
+            throw new IllegalStateException("You must initial EZRetrofit before you using it.");
         }
     }
 
@@ -184,7 +215,7 @@ public class EZRetrofit<T> {
     @SuppressWarnings("unchecked")
     public static <T> EZRetrofitHelper<T> create(RetrofitConf retrofitConf) {
         checkInitialStatus();
-        EZRetrofitHelper<T> helper = EZRetrofitHelper.newInstance()
+        EZRetrofitHelper<T> helper = EZRetrofitHelper.<T>newInstance()
                 .setRetrofitBuilder(build(retrofitConf))
                 .setRetrofitConf(retrofitConf)
                 .setRetrofitMap(sRetrofitMap);
@@ -194,7 +225,7 @@ public class EZRetrofit<T> {
     @SuppressWarnings("unchecked")
     public static <T> EZRetrofitHelper<T> create() {
         checkInitialStatus();
-        return (EZRetrofitHelper<T>) EZRetrofitHelper.newInstance()
+        return (EZRetrofitHelper<T>) EZRetrofitHelper.<T>newInstance()
                 .setRetrofitBuilder(sBuilder)
                 .setRetrofitConf(sRetrofitConf)
                 .setRetrofitMap(sRetrofitMap);
@@ -203,56 +234,10 @@ public class EZRetrofit<T> {
     @SuppressWarnings("unchecked")
     public static <T> T create(Class<T> cls) {
         checkInitialStatus();
-        EZRetrofitHelper<T> helper = EZRetrofitHelper.newInstance()
+        EZRetrofitHelper<T> helper = EZRetrofitHelper.<T>newInstance()
                 .setRetrofitBuilder(sBuilder)
                 .setRetrofitConf(sRetrofitConf)
                 .setRetrofitMap(sRetrofitMap);
         return helper.webservice(cls);
-    }
-
-    public static class EZRetrofitHelper<T> {
-
-        private RetrofitConf _RetrofitConf;
-        private Retrofit.Builder _Builder;
-        private Map<Class<?>, Retrofit> _RetrofitMap;
-
-        private static final class InnerHelper {
-            public static volatile EZRetrofitHelper _sHelper = new EZRetrofitHelper();
-        }
-
-        public static EZRetrofitHelper newInstance() {
-            return InnerHelper._sHelper;
-        }
-
-        EZRetrofitHelper() {
-
-        }
-
-        public EZRetrofitHelper setRetrofitConf(RetrofitConf conf) {
-            this._RetrofitConf = conf;
-            return this;
-        }
-
-        public EZRetrofitHelper setRetrofitBuilder(Retrofit.Builder builder) {
-            this._Builder = builder;
-            return this;
-        }
-
-        public EZRetrofitHelper setRetrofitMap(Map<Class<?>, Retrofit> retrofitMap) {
-            this._RetrofitMap = retrofitMap;
-            return this;
-        }
-
-        public T webservice(Class<T> clsWebservice) {
-            if (_RetrofitMap.get(clsWebservice) == null) {
-                Retrofit retrofit = _Builder.baseUrl(_RetrofitConf.getBaseUrl(clsWebservice))
-                        .build();
-                _RetrofitMap.put(clsWebservice, retrofit);
-            }
-
-            Retrofit retrofit = _RetrofitMap.get(clsWebservice);
-
-            return retrofit.create(clsWebservice);
-        }
     }
 }

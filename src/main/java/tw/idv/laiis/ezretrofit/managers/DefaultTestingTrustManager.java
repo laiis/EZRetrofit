@@ -15,12 +15,16 @@ public class DefaultTestingTrustManager implements X509TrustManager {
 
     @Override
     public void checkClientTrusted(X509Certificate[] x509Certificates, String s) throws CertificateException {
-
+        if (!tw.idv.laiis.ezretrofit.BuildConfig.DEBUG) {
+            throw new SecurityException("DefaultTestingTrustManager must not be used in production");
+        }
     }
 
     @Override
     public void checkServerTrusted(X509Certificate[] x509Certificates, String s) throws CertificateException {
-
+        if (!tw.idv.laiis.ezretrofit.BuildConfig.DEBUG) {
+            throw new SecurityException("DefaultTestingTrustManager must not be used in production");
+        }
     }
 
     @Override

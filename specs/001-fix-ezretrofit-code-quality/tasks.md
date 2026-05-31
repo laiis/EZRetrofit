@@ -16,9 +16,9 @@ description: "Task list for EZRetrofit Code Quality and Security Fixes"
 
 **Purpose**: Project initialization and basic structure
 
-- [ ] T001 Setup `com.github.gmazzo.buildconfig` plugin in build.gradle to generate `BuildConfig.DEBUG`
-- [ ] T002 [P] Create `EZLogger` interface contract in `src/main/java/tw/idv/laiis/ezretrofit/EZLogger.java`
-- [ ] T003 [P] Deprecate `LibConfig` class in `src/main/java/tw/idv/laiis/ezretrofit/LibConfig.java`
+- [X] T001 Setup `com.github.gmazzo.buildconfig` plugin in build.gradle to generate `BuildConfig.DEBUG`
+- [X] T002 [P] Create `EZLogger` interface contract in `src/main/java/tw/idv/laiis/ezretrofit/EZLogger.java`
+- [X] T003 [P] Deprecate `LibConfig` class in `src/main/java/tw/idv/laiis/ezretrofit/LibConfig.java`
 
 ---
 
@@ -26,8 +26,8 @@ description: "Task list for EZRetrofit Code Quality and Security Fixes"
 
 **Purpose**: Core infrastructure that MUST be complete before ANY user story can be implemented
 
-- [ ] T004 Create `EZRetrofitHelper` class in `src/main/java/tw/idv/laiis/ezretrofit/EZRetrofitHelper.java` to support thread-safe instantiation
-- [ ] T005 Add `setLogger(EZLogger)` method and default Android `Log.w()` / `System.err` logging fallback in `src/main/java/tw/idv/laiis/ezretrofit/EZRetrofit.java`
+- [X] T004 Create `EZRetrofitHelper` class in `src/main/java/tw/idv/laiis/ezretrofit/EZRetrofitHelper.java` to support thread-safe instantiation
+- [X] T005 Add `setLogger(EZLogger)` method and standard Java-based `System.err` logging fallback (avoiding Android platform-specific dependencies) in `src/main/java/tw/idv/laiis/ezretrofit/EZRetrofit.java`
 
 **Checkpoint**: Foundation ready - user story implementation can now begin in parallel
 
@@ -43,13 +43,13 @@ description: "Task list for EZRetrofit Code Quality and Security Fixes"
 
 > **NOTE: Write these tests FIRST, ensure they FAIL before implementation**
 
-- [ ] T006 [P] [US1] Unit test for Cookie remove by name, join without trailing comma, and corrupt decode handling in `src/test/java/tw/idv/laiis/ezretrofit/cookies/PersistentCookieStoreTest.java`
+- [X] T006 [P] [US1] Unit test for Cookie remove by name, join without trailing comma, and corrupt decode handling in `src/test/java/tw/idv/laiis/ezretrofit/cookies/PersistentCookieStoreTest.java`
 
 ### Implementation for User Story 1
 
-- [ ] T007 [US1] Fix `PersistentCookieStore.remove()` to use cookie `name` as key instead of domain in `src/main/java/tw/idv/laiis/ezretrofit/cookies/PersistentCookieStore.java`
-- [ ] T008 [US1] Fix `PersistentCookieStore.join()` to serialize without trailing comma in `src/main/java/tw/idv/laiis/ezretrofit/cookies/PersistentCookieStore.java`
-- [ ] T009 [US1] Handle corrupted cookie decoding by logging warning via `EZLogger` instead of returning null in `src/main/java/tw/idv/laiis/ezretrofit/cookies/PersistentCookieStore.java`
+- [X] T007 [US1] Fix `PersistentCookieStore.remove()` to use cookie `name` as key instead of domain in `src/main/java/tw/idv/laiis/ezretrofit/cookies/PersistentCookieStore.java`
+- [X] T008 [US1] Fix `PersistentCookieStore.join()` to serialize without trailing comma in `src/main/java/tw/idv/laiis/ezretrofit/cookies/PersistentCookieStore.java`
+- [X] T009 [US1] Handle corrupted cookie decoding by logging warning via `EZLogger` instead of returning null in `src/main/java/tw/idv/laiis/ezretrofit/cookies/PersistentCookieStore.java`
 
 **Checkpoint**: At this point, User Story 1 should be fully functional and testable independently
 
@@ -57,19 +57,19 @@ description: "Task list for EZRetrofit Code Quality and Security Fixes"
 
 ## Phase 4: User Story 2 - 多執行緒環境下安全建立 Retrofit 服務 (Priority: P1)
 
-**Goal**: Thread-safe Retrofit service creation using `EZRetrofit.create()` to avoid baseUrl mismatch.
+**Goal**: Thread-safe Retrofit service creation using `EZRetrofit.create()` with standard Java double-checked locking and `volatile` cache variables to avoid baseUrl mismatch.
 
 **Independent Test**: Concurrent stress test with 10 threads, 1000 iterations for correct baseUrl.
 
 ### Tests for User Story 2 ⚠️
 
-- [ ] T010 [P] [US2] Concurrent stress test for `EZRetrofit.create(Class)` in `src/test/java/tw/idv/laiis/ezretrofit/EZRetrofitTest.java`
-- [ ] T011 [P] [US2] Unit test for `CallManager.cancelAll()` thread safety in `src/test/java/tw/idv/laiis/ezretrofit/CallManagerTest.java`
+- [X] T010 [P] [US2] Concurrent stress test for `EZRetrofit.create(Class)` in `src/test/java/tw/idv/laiis/ezretrofit/EZRetrofitTest.java`
+- [X] T011 [P] [US2] Unit test for `CallManager.cancelAll()` thread safety in `src/test/java/tw/idv/laiis/ezretrofit/CallManagerTest.java`
 
 ### Implementation for User Story 2
 
-- [ ] T012 [US2] Update `EZRetrofit.create()` to use `ConcurrentHashMap` and double-checked locking in `src/main/java/tw/idv/laiis/ezretrofit/EZRetrofit.java`
-- [ ] T013 [US2] Refactor `CallManager` to use thread-safe collections (`ConcurrentLinkedQueue`) for call lists in `src/main/java/tw/idv/laiis/ezretrofit/CallManager.java`
+- [X] T012 [US2] Update `EZRetrofit.create()` cache variable with `volatile` and implement double-checked locking in `src/main/java/tw/idv/laiis/ezretrofit/EZRetrofit.java`
+- [X] T013 [US2] Refactor `CallManager` to use thread-safe collections (`ConcurrentLinkedQueue`) for call lists in `src/main/java/tw/idv/laiis/ezretrofit/CallManager.java`
 
 **Checkpoint**: At this point, User Stories 1 AND 2 should both work independently
 
@@ -83,12 +83,12 @@ description: "Task list for EZRetrofit Code Quality and Security Fixes"
 
 ### Tests for User Story 3 ⚠️
 
-- [ ] T014 [P] [US3] Unit test for SHA-256 vs SHA-1 pin validation in `src/test/java/tw/idv/laiis/ezretrofit/managers/EZRetrofitTrustManagerTest.java`
+- [X] T014 [P] [US3] Unit test for SHA-256 vs SHA-1 pin validation in `src/test/java/tw/idv/laiis/ezretrofit/managers/EZRetrofitTrustManagerTest.java`
 
 ### Implementation for User Story 3
 
-- [ ] T015 [US3] Update `EZRetrofitTrustManager` to enforce SHA-256 hashing and handle empty pins gracefully without NPE in `src/main/java/tw/idv/laiis/ezretrofit/managers/EZRetrofitTrustManager.java`
-- [ ] T016 [US3] Restrict `SupportAllTlsSocketFactory` to OkHttp `ConnectionSpec.MODERN_TLS.cipherSuites()` in `src/main/java/tw/idv/laiis/ezretrofit/SupportAllTlsSocketFactory.java`
+- [X] T015 [US3] Update `EZRetrofitTrustManager` to enforce SHA-256 hashing and handle empty pins gracefully without NPE in `src/main/java/tw/idv/laiis/ezretrofit/managers/EZRetrofitTrustManager.java`
+- [X] T016 [US3] Restrict `SupportAllTlsSocketFactory` to OkHttp `ConnectionSpec.MODERN_TLS.cipherSuites()` in `src/main/java/tw/idv/laiis/ezretrofit/SupportAllTlsSocketFactory.java`
 
 **Checkpoint**: All user stories up to US3 should be independently functional
 
@@ -102,11 +102,11 @@ description: "Task list for EZRetrofit Code Quality and Security Fixes"
 
 ### Tests for User Story 4 ⚠️
 
-- [ ] T017 [P] [US4] Unit test for environment check based on `BuildConfig.DEBUG` in `src/test/java/tw/idv/laiis/ezretrofit/managers/DefaultTestingTrustManagerTest.java`
+- [X] T017 [P] [US4] Unit test for environment check based on `BuildConfig.DEBUG` in `src/test/java/tw/idv/laiis/ezretrofit/managers/DefaultTestingTrustManagerTest.java`
 
 ### Implementation for User Story 4
 
-- [ ] T018 [US4] Update `DefaultTestingTrustManager` to check `BuildConfig.DEBUG` and throw exception in production in `src/main/java/tw/idv/laiis/ezretrofit/managers/DefaultTestingTrustManager.java`
+- [X] T018 [US4] Update `DefaultTestingTrustManager` to check `BuildConfig.DEBUG` and throw exception in production in `src/main/java/tw/idv/laiis/ezretrofit/managers/DefaultTestingTrustManager.java`
 
 ---
 
@@ -118,13 +118,13 @@ description: "Task list for EZRetrofit Code Quality and Security Fixes"
 
 ### Tests for User Story 5 ⚠️
 
-- [ ] T019 [P] [US5] Unit test for `SSLFactoryManager.build()` missing properties in `src/test/java/tw/idv/laiis/ezretrofit/managers/SSLFactoryManagerTest.java`
+- [X] T019 [P] [US5] Unit test for `SSLFactoryManager.build()` missing properties in `src/test/java/tw/idv/laiis/ezretrofit/managers/SSLFactoryManagerTest.java`
 
 ### Implementation for User Story 5
 
-- [ ] T020 [US5] Throw `IllegalStateException` on incomplete configuration in `SSLFactoryManager.build()` in `src/main/java/tw/idv/laiis/ezretrofit/managers/SSLFactoryManager.java`
-- [ ] T021 [US5] Fix tag validation in `CallManager` to use positive logic (`tag != null && !tag.isEmpty()`) in `src/main/java/tw/idv/laiis/ezretrofit/CallManager.java`
-- [ ] T022 [US5] Throw explicit exception in `EZRetrofit.create()` if `initial()` hasn't been called in `src/main/java/tw/idv/laiis/ezretrofit/EZRetrofit.java`
+- [X] T020 [US5] Throw `IllegalStateException` on incomplete configuration in `SSLFactoryManager.build()` in `src/main/java/tw/idv/laiis/ezretrofit/managers/SSLFactoryManager.java`
+- [X] T021 [US5] Fix tag validation in `CallManager` to use positive logic (`tag != null && !tag.isEmpty()`) in `src/main/java/tw/idv/laiis/ezretrofit/CallManager.java`
+- [X] T022 [US5] Throw explicit exception in `EZRetrofit.create()` if `initial()` hasn't been called in `src/main/java/tw/idv/laiis/ezretrofit/EZRetrofit.java`
 
 ---
 
@@ -132,9 +132,9 @@ description: "Task list for EZRetrofit Code Quality and Security Fixes"
 
 **Purpose**: Improvements that affect multiple user stories and code quality
 
-- [ ] T023 [P] Fix API misspellings (e.g., `getCertficatePinner` -> `getCertificatePinner`) and deprecate old methods in `src/main/java/tw/idv/laiis/ezretrofit/RetrofitConf.java` and related classes.
-- [ ] T024 [P] Add comments for unused `mProtocol` and `mCertPins` fields indicating they are unused.
-- [ ] T025 Run quickstart.md validation to verify all code samples.
+- [X] T023 [P] Fix API misspellings (e.g., `getCertficatePinner` -> `getCertificatePinner`) and deprecate old methods in `src/main/java/tw/idv/laiis/ezretrofit/RetrofitConf.java` and related classes.
+- [X] T024 [P] Add comments for unused `mProtocol` and `mCertPins` fields indicating they are unused.
+- [X] T025 Run quickstart.md validation to verify all code samples.
 
 ---
 

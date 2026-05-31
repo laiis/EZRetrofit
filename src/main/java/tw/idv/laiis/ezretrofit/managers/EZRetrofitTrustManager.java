@@ -25,7 +25,7 @@ import java.util.List;
 public class EZRetrofitTrustManager implements X509TrustManager {
 
     private static final String TAG = EZRetrofitTrustManager.class.getName();
-    private final String ALGORITHM_SHA1 = "SHA-1";
+    private final String ALGORITHM_SHA256 = "SHA-256";
 
     private KeyStore mKeyStore;
     private String[] mPins;
@@ -39,7 +39,7 @@ public class EZRetrofitTrustManager implements X509TrustManager {
     public EZRetrofitTrustManager(KeyStore keyStore, String[] pins) throws NoSuchAlgorithmException {
         this.mKeyStore = keyStore;
         this.mPins = pins;
-        this.mMessageDigest = MessageDigest.getInstance(ALGORITHM_SHA1);
+        this.mMessageDigest = MessageDigest.getInstance(ALGORITHM_SHA256);
         try {
             TrustManagerFactory trustManagerFactory = TrustManagerFactory.getInstance(TrustManagerFactory.getDefaultAlgorithm());
             trustManagerFactory.init(mKeyStore);
@@ -75,12 +75,14 @@ public class EZRetrofitTrustManager implements X509TrustManager {
     }
 
     private boolean validateCertificatePin(X509Certificate cert) throws CertificateException {
+        if (mPins == null || mPins.length == 0) {
+            return true;
+        }
         final byte[] pubKeyInfo = cert.getPublicKey().getEncoded();
         final byte[] pin = mMessageDigest.digest(pubKeyInfo);
         final String pinAsHex = bytesToHex(pin);
         for (String validPin : mPins) {
-            boolean result = validPin.equalsIgnoreCase(pinAsHex);
-            if (result) {
+            if (validPin != null && validPin.equalsIgnoreCase(pinAsHex)) {
                 return true;
             }
         }

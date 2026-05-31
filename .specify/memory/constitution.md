@@ -18,7 +18,7 @@ Sync Impact Report:
 ## 核心準則
 
 ### I. 執行緒安全優先
-函式庫核心元件（如 `EZRetrofitHelper` 與 `CallManager`）必須為執行緒安全，以避免競爭危害 (race conditions)。嚴禁在服務建立時使用具備可變狀態的單例模式。所有共用的集合物件必須具備執行緒安全性。
+函式庫核心元件（如 `EZRetrofitHelper` 與 `CallManager`）必須為執行緒安全，以避免競爭危害 (race conditions)。所有共用的集合物件必須具備執行緒安全性。在建立與快取 Retrofit 服務實例時，允許使用具備雙重鎖定檢測 (Double-checked locking) 的執行緒安全同步設計，以防止因並行初始化導致的配置覆蓋或競爭。
 
 ### II. 預設安全
 所有 TLS 驗證、憑證綁定與密碼套件必須符合現代安全標準（例如：綁定使用 SHA-256，密碼套件採用 `ConnectionSpec.MODERN_TLS`）。測試用途的繞過機制（如 `DefaultTestingTrustManager`）必須明確限制只能在非正式環境中執行（例如透過 `BuildConfig.DEBUG` 判斷）。
@@ -44,6 +44,10 @@ Sync Impact Report:
 - 所有新方法與錯誤修復都必須附帶對應的單元測試。
 - 靜態分析與程式碼審查必須明確檢查是否包含空的 catch 區塊，並確保正確使用日誌記錄。
 - 前次版本中已廢棄 (Deprecated) 的方法應排定於下一次主版號更新時移除。
+ 
+## 語系
+
+使用任何工具產生的規格文件, 一律以正體中文回應使用者，一律以正體中文撰寫文件，以台灣用詞為準。
 
 ## 治理
 

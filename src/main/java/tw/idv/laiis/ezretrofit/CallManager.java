@@ -28,14 +28,14 @@ final class CallManager {
     }
 
     private CallManager() {
-        mCallMap = Collections.synchronizedMap(new HashMap<String, Call>());
-        mCounterMap = Collections.synchronizedMap(new HashMap<String, RequestCounter>());
+        mCallMap = new java.util.concurrent.ConcurrentHashMap<>();
+        mCounterMap = new java.util.concurrent.ConcurrentHashMap<>();
     }
 
     public void enqueue(Call call, EZCallback callback) {
         synchronized (this) {
             String tag = callback.getTag();
-            if (!(tag == null || tag.length() == 0)) {
+            if (tag != null && !tag.isEmpty()) {
                 if (mCallMap.get(tag) == null) {
                     mCallMap.put(tag, call);
                     if (!mCounterMap.containsKey(tag)) {
