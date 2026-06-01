@@ -24,7 +24,9 @@ public class RetrofitConf {
 
     @Deprecated
     private boolean isUseSSL;
+    // mProtocol 目前為未使用狀態，保留以維護向後相容性。
     private String mProtocol;
+    // mCertPins 目前為未使用狀態，保留以維護向後相容性。
     private String[] mCertPins;
     private long mTimeout = 15L; // default
     private CookieJar mCookieJar;
@@ -118,7 +120,12 @@ public class RetrofitConf {
         this.mCertificatePinner = certificatePinner;
     }
 
+    @Deprecated
     public CertificatePinner getCertficatePinner() {
+        return getCertificatePinner();
+    }
+
+    public CertificatePinner getCertificatePinner() {
         return mCertificatePinner;
     }
 
@@ -617,6 +624,12 @@ public class RetrofitConf {
             }
 
             public SSLFactoryManager build() {
+                if (_TlsVersion == null) {
+                    throw new IllegalStateException("TlsVersion cannot be null");
+                }
+                if (_SupportProtocols == null || _SupportProtocols.length == 0) {
+                    throw new IllegalStateException("SupportProtocols cannot be null or empty");
+                }
                 try {
                     X509TrustManager trustManager = null;
 
@@ -646,10 +659,8 @@ public class RetrofitConf {
                     sslFactoryManager.setX509TrustManager(trustManager);
                     return sslFactoryManager;
                 } catch (Exception e) {
-                    e.printStackTrace();
+                    throw new IllegalStateException("Failed to build SSLFactoryManager", e);
                 }
-
-                return null;
             }
         }
 

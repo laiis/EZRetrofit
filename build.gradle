@@ -1,7 +1,14 @@
 apply plugin: 'java'
 apply plugin: 'java-library'
-apply plugin: 'maven'
+apply plugin: 'maven-publish'
+apply plugin: 'com.github.gmazzo.buildconfig'
 apply plugin: MyCustomPlugin
+
+buildConfig {
+    useJavaOutput()
+    packageName("tw.idv.laiis.ezretrofit")
+    buildConfigField("boolean", "DEBUG", "true") // This is set to true for now; in a full Android build it's configured based on debug/release variants.
+}
 
 compileJava {
     sourceCompatibility = 1.8
@@ -9,75 +16,83 @@ compileJava {
 }
 
 jar {
-    version "0.1.2"
-    baseName 'EZRetrofit'
+    archiveVersion = "0.2.0"
+    archiveBaseName = 'ezretrofit'
 }
 
 
 repositories {
     google()
-    jcenter()
     mavenCentral()
 }
 
 dependencies {
     implementation fileTree(dir: 'libs', include: ['*.jar'])
-    testImplementation 'junit:junit:4.12'
+    testImplementation 'org.junit.jupiter:junit-jupiter:5.11.0'
 
-    api 'com.squareup.retrofit2:retrofit:2.7.2'
-    api 'com.squareup.retrofit2:converter-gson:2.7.2'
-    api 'com.squareup.retrofit2:adapter-rxjava2:2.7.2'
+    api 'com.squareup.retrofit2:retrofit:2.12.0'
+    api 'com.squareup.retrofit2:converter-gson:2.12.0'
+    api 'com.squareup.retrofit2:adapter-rxjava2:2.12.0'
 
-    api 'com.squareup.okhttp3:okhttp:3.14.7'
-    api 'com.squareup.okhttp3:okhttp-urlconnection:3.14.7'
-    api 'com.squareup.okhttp3:logging-interceptor:3.14.7'
-    api 'com.squareup.okio:okio:2.4.3'
+    api 'com.squareup.okhttp3:okhttp:4.12.0'
+    api 'com.squareup.okhttp3:okhttp-urlconnection:4.12.0'
+    api 'com.squareup.okhttp3:logging-interceptor:4.12.0'
+    api 'com.squareup.okio:okio:3.4.0'
+}
+
+test {
+    useJUnitPlatform()
 }
 
 buildscript {
     repositories {
         google()
-        jcenter()
         mavenCentral()
-        flatDir dirs: './proguard/lib'
+        gradlePluginPortal()
     }
     dependencies {
-        classpath ':proguard:'
+        classpath 'com.guardsquare:proguard-gradle:7.5.0'
+        classpath 'com.github.gmazzo.buildconfig:com.github.gmazzo.buildconfig.gradle.plugin:5.3.5'
     }
 }
 
 allprojects {
     repositories {
         google()
-        jcenter()
         mavenCentral()
     }
 }
 
-task jar(type: Jar, overwrite: true) {
-    doLast {
-        project.useproguard.execute()
-        file('build/libs/EZRetrofit-0.1.2.jar').delete()
-        file('build/libs/EZRetrofit-0.1.2-proguard.jar').renameTo('build/libs/EZRetrofit-0.1.2.jar')
-    }
+tasks.named('jar') {
+    finalizedBy 'useproguard'
 }
 
-//task proguard(type: proguard.gradle.ProGuardTask) {
-//    configuration 'proguard-rules.pro'
-//
-//    injars 'build/libs/EZRetrofit-0.0.6.jar'
-//    outjars 'build/libs/EZRetrofit-0.0.6-proguard.jar'
-//}
-
+tasks.named('useproguard') {
+    dependsOn 'jar'
+    doLast {
+        def version = project.tasks.jar.archiveVersion.get()
+        def baseName = project.tasks.jar.archiveBaseName.get()
+        file("build/libs/${baseName}-${version}.jar").delete()
+        file("build/libs/${baseName}-${version}-proguard.jar").renameTo("build/libs/${baseName}-${version}-pg.jar")
+    }
+}
 
 class MyCustomPlugin implements Plugin<Project> {
 
     void apply(Project project) {
-        project.tasks.create("useproguard", proguard.gradle.ProGuardTask.class) {
+        project.tasks.create("useproguard", proguard.gradle.ProGuardTask) {
             configuration 'proguard-rules.pro'
+        }
 
-            injars "build/libs/EZRetrofit-0.1.2.jar"
-            outjars "build/libs/EZRetrofit-0.1.2-proguard.jar"
+        project.afterEvaluate {
+            project.tasks.named("useproguard", proguard.gradle.ProGuardTask) {
+                def jarTask = project.tasks.jar
+                def version = jarTask.archiveVersion.get()
+                def baseName = jarTask.archiveBaseName.get()
+
+                injars "build/libs/${baseName}-${version}.jar"
+                outjars "build/libs/${baseName}-${version}-proguard.jar"
+            }
         }
     }
 

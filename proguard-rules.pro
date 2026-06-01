@@ -65,6 +65,11 @@
 -dontwarn okhttp3.**
 -keep class okhttp3.** { *;}
 
+# Kotlin
+-dontwarn kotlin.**
+-keep class kotlin.** { *; }
+-keepclassmembers class kotlin.Metadata { *; }
+
 -dontwarn tw.idv.laiis.ezretrofit.**
 -keep class tw.idv.laiis.ezretrofit.EZCallback { *; }
 -keep class tw.idv.laiis.ezretrofit.EZRetrofit { *; }

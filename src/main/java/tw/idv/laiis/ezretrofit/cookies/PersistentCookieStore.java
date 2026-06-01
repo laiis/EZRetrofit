@@ -69,7 +69,7 @@ public class PersistentCookieStore {
             mCookies.get(cookie.domain()).put(cookie.name(), cookie);
         } else {
             if (mCookies.containsKey(cookie.domain()))
-                mCookies.get(cookie.domain()).remove(cookie.domain());
+                mCookies.get(cookie.domain()).remove(cookie.name());
         }
         //Save cookie into persistent store
         mCookieStoreRepo.putString(cookie.domain(), join(",", mCookies.get(cookie.domain()).keySet()));
@@ -114,6 +114,7 @@ public class PersistentCookieStore {
             ObjectInputStream objectInputStream = new ObjectInputStream(byteArrayInputStream);
             cookie = ((SerializableHttpCookie) objectInputStream.readObject()).getCookie();
         } catch (Exception e) {
+            tw.idv.laiis.ezretrofit.EZRetrofit.getLogger().warn("PersistentCookieStore", "Decode cookie failed: " + cookieString, e);
         }
         return cookie;
     }
@@ -146,15 +147,14 @@ public class PersistentCookieStore {
     }
 
     private String join(String seperator, Set<String> keySet) {
-        StringBuffer sb = new StringBuffer();
-        for (Iterator<String> iterator = keySet.iterator(); iterator.hasNext(); ) {
-            boolean hasNext = iterator.hasNext();
+        StringBuilder sb = new StringBuilder();
+        Iterator<String> iterator = keySet.iterator();
+        while (iterator.hasNext()) {
             sb.append(iterator.next());
-            if (hasNext) {
+            if (iterator.hasNext()) {
                 sb.append(seperator);
             }
         }
-
         return sb.toString();
     }
 }
