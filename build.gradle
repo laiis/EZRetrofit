@@ -25,7 +25,7 @@ tasks.withType(PublishToMavenRepository) {
 buildConfig {
     useJavaOutput()
     packageName("tw.idv.laiis.ezretrofit")
-    buildConfigField("boolean", "DEBUG", "true") // This is set to true for now; in a full Android build it's configured based on debug/release variants.
+    buildConfigField("boolean", "DEBUG", "false") // This is set to true for now; in a full Android build it's configured based on debug/release variants.
 }
 
 compileJava {
