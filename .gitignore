@@ -259,4 +259,6 @@ freeline_project_description.json
 .githooks/
 AGENTS.md
 AGENTS_detail.md
+.agents/memory/
+
 
