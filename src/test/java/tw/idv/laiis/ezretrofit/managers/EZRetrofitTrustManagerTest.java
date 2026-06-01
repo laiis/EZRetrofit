@@ -1,6 +1,6 @@
 package tw.idv.laiis.ezretrofit.managers;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import java.math.BigInteger;
 import java.security.*;
 import java.security.cert.CertificateEncodingException;
@@ -10,7 +10,7 @@ import java.security.cert.CertificateNotYetValidException;
 import java.security.cert.X509Certificate;
 import java.util.Date;
 import java.util.Set;
-import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.*;
 
 public class EZRetrofitTrustManagerTest {
 
@@ -25,7 +25,7 @@ public class EZRetrofitTrustManagerTest {
             java.lang.reflect.Method method = EZRetrofitTrustManager.class.getDeclaredMethod("validateCertificatePin", X509Certificate.class);
             method.setAccessible(true);
             boolean result = (boolean) method.invoke(trustManagerNull, mockCert);
-            assertTrue("validateCertificatePin should return true when pins are null", result);
+            assertTrue(result, "validateCertificatePin should return true when pins are null");
         } catch (Exception e) {
             fail("Should not throw exception when pins are null: " + e.getMessage());
         }
@@ -36,7 +36,7 @@ public class EZRetrofitTrustManagerTest {
             java.lang.reflect.Method method = EZRetrofitTrustManager.class.getDeclaredMethod("validateCertificatePin", X509Certificate.class);
             method.setAccessible(true);
             boolean result = (boolean) method.invoke(trustManagerEmpty, mockCert);
-            assertTrue("validateCertificatePin should return true when pins are empty", result);
+            assertTrue(result, "validateCertificatePin should return true when pins are empty");
         } catch (Exception e) {
             fail("Should not throw exception when pins are empty: " + e.getMessage());
         }
@@ -62,12 +62,12 @@ public class EZRetrofitTrustManagerTest {
         java.lang.reflect.Method method = EZRetrofitTrustManager.class.getDeclaredMethod("validateCertificatePin", X509Certificate.class);
         method.setAccessible(true);
         boolean result = (boolean) method.invoke(trustManager, mockCert);
-        assertTrue("SHA-256 Pin matching should succeed", result);
+        assertTrue(result, "SHA-256 Pin matching should succeed");
 
         // 2. 使用不正確的 Pin 驗證
         EZRetrofitTrustManager trustManagerWrong = new EZRetrofitTrustManager(null, new String[]{"WRONGPINHEX123456"});
         boolean resultWrong = (boolean) method.invoke(trustManagerWrong, mockCert);
-        assertFalse("Incorrect SHA-256 Pin should fail", resultWrong);
+        assertFalse(resultWrong, "Incorrect SHA-256 Pin should fail");
 
         // 3. 測試已被廢棄的 SHA-1 Pin (在此應被視為無效或不相符，因為我們強制使用 SHA-256)
         java.security.MessageDigest sha1Digest = java.security.MessageDigest.getInstance("SHA-1");
@@ -80,7 +80,7 @@ public class EZRetrofitTrustManagerTest {
         
         EZRetrofitTrustManager trustManagerSha1 = new EZRetrofitTrustManager(null, new String[]{legacySha1Pin});
         boolean resultSha1 = (boolean) method.invoke(trustManagerSha1, mockCert);
-        assertFalse("Legacy SHA-1 Pin should fail validation", resultSha1);
+        assertFalse(resultSha1, "Legacy SHA-1 Pin should fail validation");
     }
 
     private static class DummyX509Certificate extends X509Certificate {

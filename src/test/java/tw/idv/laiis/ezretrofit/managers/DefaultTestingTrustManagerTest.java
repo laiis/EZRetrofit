@@ -1,9 +1,9 @@
 package tw.idv.laiis.ezretrofit.managers;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import tw.idv.laiis.ezretrofit.BuildConfig;
 import java.security.cert.X509Certificate;
-import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.*;
 
 public class DefaultTestingTrustManagerTest {
 

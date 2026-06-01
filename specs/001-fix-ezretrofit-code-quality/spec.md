@@ -90,10 +90,10 @@
 
 ## Edge Cases
 
-- 當 `EZRetrofit.initial()` 尚未被呼叫，使用者即呼叫 `create()` 時，應拋出清楚的說明例外（現有行為，需確保維持正確）。
-- 當 `mPins` 為 null 或空陣列時，`validateCertificatePin()` 不應拋出 NullPointerException。
-- 當 Cookie 的 domain map 不含指定 domain 時，`remove()` 操作不應拋出 NullPointerException。
-- `cancelAll()` 執行中若有執行緒同時新增 call，不應發生 ConcurrentModificationException。
+- 當 `EZRetrofit.initial()` 尚未被呼叫，使用者即呼叫 `create()` 時，必須 100% 拋出具備說明之例外（現有行為，需確保維持正確）。
+- 當 `mPins` 為 null 或空陣列時，`validateCertificatePin()` 必須 100% 安全通過驗證，不拋出任何 NullPointerException。
+- 當 Cookie 的 domain map 不含指定 domain 時，`remove()` 操作必須 100% 安全返回，不拋出任何 NullPointerException。
+- `cancelAll()` 執行中若有執行緒同時新增 call，發生 ConcurrentModificationException 的機率必須為 0%。
 
 ---
 
@@ -101,17 +101,18 @@
 
 ### Functional Requirements
 
-- **FR-001**: 函式庫必須正確移除過期 Cookie，移除時使用 Cookie 的 `name` 作為 key，而非 `domain`。
+- **FR-001**: 函式庫必須 100% 正確移除過期 Cookie，移除時使用 Cookie 的 `name` 作為 key，而非 `domain`。
 - **FR-002**: `join()` 序列化 Cookie 名稱時，輸出結果不得包含尾端分隔符（如 `a,b,c` 而非 `a,b,c,`）。
 - **FR-003**: `EZRetrofitHelper` 每次被請求時必須回傳獨立實例，不得共用可變的單例 (Singleton) 狀態。
 - **FR-004**: Certificate Pinning 驗證必須使用 SHA-256 雜湊演算法；不得接受 SHA-1 格式的 pin 值。
-- **FR-005**: `DefaultTestingTrustManager` 必須在非開發環境下拒絕所有連線並拋出明確例外；環境偵測依據為建構工具自動生成的 `BuildConfig.DEBUG` 旗標（透過 `com.github.gmazzo.buildconfig` 插件產生）；現有 `LibConfig` 類別須標記為 `@Deprecated` 並以 `BuildConfig` 取代。
-- **FR-006**: `SSLFactoryManager.build()` 在設定不完整或初始化失敗時，必須拋出例外而非回傳 `null`。
-- **FR-007**: 函式庫內部發生可復式警告事件（如 Cookie 解碼失敗）時，必須透過可插拔 Logger 介面將訊息輸出；空 catch 區塊需全面移除，不得靜默忽略任何可復式錯誤。
+- **FR-005**: `DefaultTestingTrustManager` 必須在非開發環境下 100% 拒絕所有連線並拋出明確例外；環境偵測依據為建構工具自動生成的 `BuildConfig.DEBUG` 旗標（透過 `com.github.gmazzo.buildconfig` 插件產生）；現有 `LibConfig` 類別須標記為 `@Deprecated` 並以 `BuildConfig` 取代。
+- **FR-006**: `SSLFactoryManager.build()` 在設定不完整或初始化失敗時，必須 100% 拋出例外而非回傳 `null`。
+- **FR-007**: 函式庫內部發生可復原之警告事件（如 Cookie 解碼失敗）時，必須 100% 透過可插拔 Logger 介面將訊息輸出；空 catch 區塊需 100% 移除，任何可復原錯誤之靜默忽略率為 0%。
 - **FR-011**: 函式庫必須提供 `EZLogger` 公開介面，包含至少 `warn(String tag, String message, Throwable t)` 方法；呼叫端可向 `EZRetrofit` 注入自訂實作；未注入時預設行為為輸出至 `System.err`。
 - **FR-008**: `CallManager` 中的 tag 空值判斷必須使用正向邏輯（`tag != null && !tag.isEmpty()`）。
 - **FR-009**: `SupportAllTlsSocketFactory` 啟用的密碼套件 (cipher suite) 必須限定於 OkHttp `ConnectionSpec.MODERN_TLS` 所定義的清單；不得呼叫 `getSupportedCipherSuites()` 全量啟用。
-- **FR-010**: 函式庫 API 的公開方法命名中不得包含拼寫錯誤（如 `getCertficatePinner` 應修正為 `getCertificatePinner`）；修正方式為新增正確拼寫的方法，同時保留舊方法名稱並標記 `@Deprecated`，以確保向後相容。
+- **FR-010**: 函式庫 API 的公開方法命名拼寫錯誤率必須為 0%（如 `getCertficatePinner` 應修正為 `getCertificatePinner`）；修正方式為新增正確拼寫的方法，同時保留舊方法名稱並標記 `@Deprecated`，以確保 100% 向後相容。
+- **FR-012**: 函式庫必須提供 Proguard 混淆規則設定，確保混淆編譯時，`tw.idv.laiis.ezretrofit` 套件底下的公開 API 與核心元件（包含 `EZCallback`、`EZRetrofit`、`RetrofitConf`、`EZRetrofitTrustManager`、`CookieStoreRepo`、`PersistentCookieStore`、`SerializableHttpCookie` 以及其內嵌類別或介面）被 100% 保留。同時，對外部相依項 `retrofit2`、`org.simpleframework`、`okio` 與 `okhttp3` 設置對應的 `-keep` 與 `-dontwarn` 保留設定，確保混淆編譯通過率為 100%。
 
 ### Key Entities
 
@@ -129,11 +130,12 @@
 ### Measurable Outcomes
 
 - **SC-001**: 100% 已知的邏輯 bug（Cookie `remove` key 錯誤、`join()` 尾端逗號）通過對應單元測試驗證，測試覆蓋率不低於所修改方法的 90%。
-- **SC-002**: 多執行緒壓力測試中，以 ≥ 10 個並發執行緒同時呼叫 `EZRetrofit.create(Class)` 共 1,000 次，0 次發生 baseUrl 錯置或 NullPointerException。
-- **SC-003**: 所有公開 API 方法名稱通過拼寫檢查，命名不一致問題降至 0 件。
+- **SC-002**: 多執行緒壓力測試中，以 ≥ 10 個並發執行緒同時呼叫 `EZRetrofit.create(Class)` 共 1,000 次，0 次發生 baseUrl 錯置或 NullPointerException，且測試失敗率為 0%。
+- **SC-003**: 所有公開 API 方法名稱拼寫錯誤率為 0%，命名拼寫不一致之問題降至 0 件。
 - **SC-004**: `DefaultTestingTrustManager` 在 release 環境下被誤用時，100% 案例拋出帶有說明文字的例外（不靜默通過）。
-- **SC-005**: `SSLFactoryManager.build()` 在任意輸入錯誤情境下，皆以例外而非 `null` 回傳（可驗證：呼叫端不再需要對 `build()` 回傳值進行 null 判斷）。
-- **SC-006**: 修復後版本對現有呼叫端保持向後相容（Backward Compatible）——已改名的 API 方法以 `@Deprecated` 舊名稱保留，現有使用者升級後無需修改呼叫程式碼；拼寫正確的新方法名稱同步提供。
+- **SC-005**: `SSLFactoryManager.build()` 於所有（100%）輸入錯誤情境下，皆拋出例外而非回傳 `null`。
+- **SC-006**: 修復後版本對現有呼叫端保持 100% 二進位向後相容（Binary Backward Compatibility）——已改名的 API 方法以 `@Deprecated` 舊名稱保留，現有使用者升級後無需修改呼叫程式碼；拼寫正確的新方法名稱同步提供。
+- **SC-007**: 啟用 Proguard 混淆編譯時，100% 可編譯成功，且上述 `tw.idv.laiis.ezretrofit` 核心元件與公開 API 的保留率為 100%，無任何遺漏。
 
 ---
 

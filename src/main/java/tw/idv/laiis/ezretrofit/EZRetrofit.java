@@ -87,6 +87,8 @@ public class EZRetrofit<T> {
             builder.protocols(retrofitConf.getProtocols());
         }
 
+        builder.addInterceptor(new SafeGzipInterceptor());
+
         if (retrofitConf.getInterceptorList() != null && retrofitConf.getInterceptorList().size() > 0) {
             for (Interceptor interceptor : retrofitConf.getInterceptorList()) {
                 builder.addInterceptor(interceptor);

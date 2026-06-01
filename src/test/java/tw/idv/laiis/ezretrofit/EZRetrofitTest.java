@@ -1,16 +1,16 @@
 package tw.idv.laiis.ezretrofit;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import java.util.concurrent.*;
-import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.*;
 
 public class EZRetrofitTest {
 
     interface TestServiceA {}
     interface TestServiceB {}
 
-    @Before
+    @BeforeEach
     public void setUp() {
         RetrofitConf conf = new RetrofitConf.Builder()
                 .baseUrls(TestServiceA.class, "https://service-a.com/")
@@ -52,11 +52,11 @@ public class EZRetrofitTest {
 
         for (int i = 0; i < iterations; i++) {
             Future<Boolean> future = completionService.take();
-            assertTrue("Retrofit service creation failed in thread", future.get());
+            assertTrue(future.get(), "Retrofit service creation failed in thread");
         }
 
         executor.shutdown();
         long duration = System.currentTimeMillis() - startTime;
-        assertTrue("Concurrent stress test took too long: " + duration + "ms", duration < 5000);
+        assertTrue(duration < 5000, "Concurrent stress test took too long: " + duration + "ms");
     }
 }

@@ -24,13 +24,13 @@ EZRetrofit 是一個基於 [Retrofit2](https://square.github.io/retrofit/) 的 A
 
 | 函式庫 | 版本 |
 |---|---|
-| Retrofit2 | 2.7.2 |
-| Converter-Gson | 2.7.2 |
-| Adapter-RxJava2 | 2.7.2 |
-| OkHttp3 | 3.14.7 |
-| OkHttp3 URLConnection | 3.14.7 |
-| OkHttp3 Logging Interceptor | 3.14.7 |
-| Okio | 2.4.3 |
+| Retrofit2 | 2.12.0 |
+| Converter-Gson | 2.12.0 |
+| Adapter-RxJava2 | 2.12.0 |
+| OkHttp3 | 4.12.0 |
+| OkHttp3 URLConnection | 4.12.0 |
+| OkHttp3 Logging Interceptor | 4.12.0 |
+| Okio | 3.4.0 |
 
 ---
 
@@ -52,7 +52,7 @@ dependencyResolutionManagement {
 
 ```groovy
 dependencies {
-    implementation 'com.github.laiis:EZRetrofit:0.1.2'
+    implementation 'com.github.laiis:EZRetrofit:0.2.0'
 }
 ```
 
@@ -246,7 +246,7 @@ src/main/java/tw/idv/laiis/ezretrofit/
 ./gradlew jar
 ```
 
-建置產物位於 `build/libs/EZRetrofit-0.1.2.jar`（已套用 ProGuard 混淆）。
+建置產物位於 `build/libs/EZRetrofit-0.2.0.jar`（已套用 ProGuard 混淆）。
 
 ---
 
