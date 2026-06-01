@@ -261,5 +261,8 @@ AGENTS.md
 AGENTS_detail.md
 .agents/memory/
 .antigravitycli/
-
-
+.agents/artifacts_guidelines.md
+.agents/conversation_transcript.md
+.agents/orchestration-routing-policy.md
+.agents/web_application_development.md
+.agents/plugin.json
