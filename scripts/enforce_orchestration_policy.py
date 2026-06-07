@@ -20,6 +20,8 @@ def detect_ai_tool() -> str:
     if env_tool:
         return env_tool.lower().strip()
 
+    if (ROOT / "opencode.jsonc").exists() or (ROOT / ".opencode").is_dir():
+        return "opencode"
     if (ROOT / ".github" / "antigravity-instructions.md").exists():
         return "antigravity"
     if (ROOT / ".claudecode").exists():
@@ -91,6 +93,11 @@ def main() -> int:
             copilot = ROOT / "AGENTS.md"
         else:
             copilot = ROOT / ".github" / "copilot-instructions.md"
+    elif ai_tool == "opencode":
+        if (ROOT / "AGENTS.md").exists():
+            copilot = ROOT / "AGENTS.md"
+        else:
+            copilot = ROOT / ".github" / "copilot-instructions.md"
     else:
         if ai_tool == "cursor" and (ROOT / ".cursorrules").exists():
             copilot = ROOT / ".cursorrules"
@@ -108,6 +115,9 @@ def main() -> int:
     if ai_tool == "antigravity":
         principal = ROOT / ".agents" / "agents" / "ai-captain.json"
         workflow_agent = ROOT / ".agents" / "agents" / "workflow-navigator.json"
+    elif ai_tool == "opencode":
+        principal = ROOT / ".opencode" / "agents" / "ai-captain.md"
+        workflow_agent = ROOT / ".opencode" / "agents" / "workflow-navigator.md"
     else:
         principal = ROOT / ".github" / "agents" / "ai-captain.agent.md"
         workflow_agent = ROOT / ".github" / "agents" / "workflow-navigator.agent.md"
@@ -181,6 +191,8 @@ def main() -> int:
         if ai_tool == "antigravity" and "/.github/" in path_str:
             continue
         if ai_tool == "copilot" and "/.agents/" in path_str:
+            continue
+        if ai_tool == "opencode" and ("/.agents/" in path_str or "/.github/agents/" in path_str):
             continue
 
         if not path.exists():

@@ -1,16 +1,16 @@
 <!--
 Sync Impact Report:
-- Version change: 1.0.0 → 1.1.0
+- Version change: 1.1.0 → 1.2.0
 - List of modified principles:
-  - 遵循「文件語言：正體中文」約束條款全面翻譯
-- Added sections: None
+  - (none renamed)
+- Added sections:
+  - VI. Clarification-Driven Development
 - Removed sections: None
 - Templates requiring updates:
-  - .specify/templates/plan-template.md (⚠ pending)
-  - .specify/templates/spec-template.md (⚠ pending)
-  - .specify/templates/tasks-template.md (⚠ pending)
-- Follow-up TODOs: 
-  - Update templates to reflect the new principles if applicable.
+  - .specify/templates/plan-template.md (✅ no changes needed)
+  - .specify/templates/spec-template.md (✅ no changes needed)
+  - .specify/templates/tasks-template.md (✅ no changes needed)
+- Follow-up TODOs: None
 -->
 
 # EZRetrofit 專案憲法
@@ -31,6 +31,9 @@ Sync Impact Report:
 
 ### V. 向下相容
 公開 API 的變更絕不可破壞既有的整合。修正錯字或更新方法時，必須保留舊的方法簽章並加上 `@Deprecated` 標註，確保現有使用者能無縫升級。
+
+### VI. Clarification-Driven Development
+任何 spec 在進入實作規劃前，必須先透過結構化 clarification 流程，釐清不明確的需求。範疇邊界、非功能約束、邊界案例等模糊地帶必須以不超過 5 個聚焦問題的方式收斂，並將結論寫回 spec 的 `## Clarifications` 區段。不得遺留未解決的 `[NEEDS CLARIFICATION]` 標記或未記錄的假設即進入規劃階段。
 
 ## 附加約束條件
 
@@ -55,4 +58,4 @@ Sync Impact Report:
 
 本憲法的修正案需要文件記錄、團隊核准及遷移計畫。憲法版本號必須依據語意化版本進行升級（破壞性治理變更為 MAJOR，新增準則為 MINOR，文字釐清為 PATCH）。
 
-**版本**: 1.1.0 | **批准日期**: 2026-05-30 | **最後修正日期**: 2026-05-30
+**版本**: 1.2.0 | **批准日期**: 2026-05-30 | **最後修正日期**: 2026-06-08
