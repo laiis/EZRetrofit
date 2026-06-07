@@ -263,3 +263,8 @@ AGENTS_detail.md
 .antigravitycli/
 
 
+# opencode
+.opencode/
+opencode.jsonc
+opencode.json
+PowerShellEditorServices.json
