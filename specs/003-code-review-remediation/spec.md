@@ -70,9 +70,9 @@
 
 #### 架構拆分 (A1, A3)
 
-- **FR-001**: `EZRetrofit` MUST 拆分為 `EZRetrofitConfig`（初始化）、`EZRetrofitClient`（OkHttp/Retrofit 建置）、`EZRetrofitLifecycle`（call/stop/count），每個類別職責單一
+- **FR-001**: `EZRetrofit` MUST 拆分為 `EZRetrofitConfig`（初始化）、`EZRetrofitClient`（OkHttp/Retrofit 建置）、`EZRetrofitLifecycle`（call/stop/count），每個類別職責單一，並放置於獨立的子套件中（如 `tw.idv.laiis.ezretrofit.config` 與 `tw.idv.laiis.ezretrofit.client`）
 - **FR-002**: 拆分後的 public API MUST 保持與原始 API 完全向後相容（方法名稱、參數、回傳值不變）
-- **FR-003**: `RetrofitConf` MUST 拆分為 `SslConfig`、`ProxyConfig`、`TimeoutConfig`、`InterceptorConfig` 等領域配置類別
+- **FR-003**: `RetrofitConf` MUST 拆分為 `SslConfig`、`ProxyConfig`、`TimeoutConfig`、`InterceptorConfig` 等領域配置類別，並放置於 `tw.idv.laiis.ezretrofit.config` 子套件中
 - **FR-004**: 拆分後的所有領域配置類別 MUST 可透過 Builder 模式組合使用
 
 #### 執行緒安全改善 (T1)
@@ -92,8 +92,8 @@
 #### 例外與安全修復 (E1, S1, F1)
 
 - **FR-010**: `SupportAllTlsSocketFactory.patch()` MUST 不再使用空 catch 區塊，至少輸出 warning 日誌
-- **FR-011**: `DefaultTestingTrustManager` MUST 防止反射繞過 `BuildConfig.DEBUG`：優先透過 ProGuard/R8 內聯常數；若無程式碼壓縮配置，則改以執行時期簽章驗證確保只有正式簽署的 APK 可執行此類除錯邏輯
-- **FR-012**: `SafeGzipInterceptor` MUST 判斷 OkHttp 自動解壓是否已啟用，若已啟用則跳過自訂 gzip 處理以避免雙重解壓
+- **FR-011**: `DefaultTestingTrustManager` MUST 防止反射繞過 `BuildConfig.DEBUG`：優先透過 ProGuard/R8 內聯常數；若無程式碼壓縮配置，則改以執行時期簽章驗證（比對當前 APK 簽章與開發團隊特定的開發/測試金鑰 SHA-256 是否一致，不符則拋出 `SecurityException`）來保護此類除錯邏輯
+- **FR-012**: `SafeGzipInterceptor` MUST 判斷 OkHttp 自動解壓是否已啟用（藉由檢查 Request Headers 是否未包含 `Accept-Encoding` 來判定），若已啟用則跳過自訂 gzip 處理以避免雙重解壓
 
 #### 日誌層級擴充 (F5)
 
@@ -101,8 +101,8 @@
 
 ### Key Entities
 
-- **EZRetrofit 系列類別**: 拆分後的 `EZRetrofitConfig`、`EZRetrofitClient`、`EZRetrofitLifecycle`，各司其職
-- **RetrofitConf 領域配置**: 拆分後的 `SslConfig`、`ProxyConfig`、`TimeoutConfig`、`InterceptorConfig`
+- **EZRetrofit 系列類別**: 拆分後的 `EZRetrofitConfig`（位於 `tw.idv.laiis.ezretrofit.config`）、`EZRetrofitClient`（位於 `tw.idv.laiis.ezretrofit.client`）、`EZRetrofitLifecycle`（位於 `tw.idv.laiis.ezretrofit.client`）
+- **RetrofitConf 領域配置**: 拆分後的 `SslConfig`、`ProxyConfig`、`TimeoutConfig` ,`InterceptorConfig`（均位於 `tw.idv.laiis.ezretrofit.config`）
 - **CallManager**: 簡化同步策略，保留單例但移除過度同步
 - **EZCallback**: 由靜態依賴改為注入式回呼
 
@@ -125,6 +125,12 @@
 - Q: 無 ProGuard/R8 時 BuildConfig.DEBUG 的替代防護？ → A: 無 ProGuard/R8 時，改以執行時期簽章驗證確保只有正式簽署的 APK 可執行。
 - Q: Deprecated facade 保留多長時間？ → A: 保留一個 minor 版本週期後移除。
 - Q: 重構後的新類別是否需要新增測試？ → A: 每個新類別至少一個測試案例，且新類別測試覆蓋率 ≥ 80%。
+
+### Session 2026-07-15
+
+- Q: 拆分後的配置與客戶端類別應放置於何處？ → A: 放置於獨立子套件中（例如 `tw.idv.laiis.ezretrofit.config` 與 `tw.idv.laiis.ezretrofit.client`）。
+- Q: DefaultTestingTrustManager 執行時期簽章驗證的具體比對策略為何？ → A: 驗證當前 APK 的簽章雜湊值是否與開發團隊特定的開發/測試金鑰 SHA-256 一致，不一致則拋出 SecurityException。
+- Q: SafeGzipInterceptor 如何判斷 OkHttp 自動解壓縮已啟用？ → A: 檢查 Request Headers 中是否未包含 Accept-Encoding 欄位，若是則表示 OkHttp 將執行自動透明解壓縮，應跳過自訂的 gzip 解壓。
 
 ## Out of Scope
 
