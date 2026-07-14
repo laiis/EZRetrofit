@@ -12,4 +12,19 @@ public interface EZLogger {
      * @param t 異常或錯誤物件，可為 null
      */
     void warn(String tag, String message, Throwable t);
+
+    /**
+     * 記錄一般資訊訊息。
+     */
+    default void info(String tag, String message, Throwable t) {}
+
+    /**
+     * 記錄偵錯訊息。
+     */
+    default void debug(String tag, String message, Throwable t) {}
+
+    /**
+     * 記錄錯誤訊息。
+     */
+    default void error(String tag, String message, Throwable t) {}
 }

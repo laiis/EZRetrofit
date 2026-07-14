@@ -22,8 +22,8 @@
 
 **Purpose**: 專案目錄結構初始化與子套件環境準備
 
-- [ ] T001 建立子套件目錄結構 `src/main/java/tw/idv/laiis/ezretrofit/config/` 與 `src/main/java/tw/idv/laiis/ezretrofit/client/`
-- [ ] T002 確認 `build.gradle` 中的 dependencies 能正常編譯並解析 OkHttp 4.12.0 與 Retrofit 2.12.0
+- [X] T001 建立子套件目錄結構 `src/main/java/tw/idv/laiis/ezretrofit/config/` 與 `src/main/java/tw/idv/laiis/ezretrofit/client/`
+- [X] T002 確認 `build.gradle` 中的 dependencies 能正常編譯並解析 OkHttp 4.12.0 與 Retrofit 2.12.0
 
 ---
 
@@ -31,8 +31,8 @@
 
 **Purpose**: 全局基礎架構，必須先完成才能開始使用者故事實作
 
-- [ ] T003 [P] 擴充 `EZLogger` 日誌介面，增加與 `warn` 風格一致的 `info`、`debug` 與 `error` 方法，檔案路徑為 `src/main/java/tw/idv/laiis/ezretrofit/EZLogger.java`
-- [ ] T004 建立領域配置基礎實體類別（`SslConfig`、`ProxyConfig`、`TimeoutConfig`、`InterceptorConfig`）於目錄 `src/main/java/tw/idv/laiis/ezretrofit/config/`
+- [X] T003 [P] 擴充 `EZLogger` 日誌介面，增加與 `warn` 風格一致的 `info`、`debug` 與 `error` 方法，檔案路徑為 `src/main/java/tw/idv/laiis/ezretrofit/EZLogger.java`
+- [X] T004 建立領域配置基礎實體類別（`SslConfig`、`ProxyConfig`、`TimeoutConfig`、`InterceptorConfig`）於目錄 `src/main/java/tw/idv/laiis/ezretrofit/config/`
 
 ---
 
@@ -44,15 +44,15 @@
 
 ### Tests for User Story 1
 
-- [ ] T005 [P] [US1] 撰寫新設定類別單元測試，檔案路徑為 `src/test/java/tw/idv/laiis/ezretrofit/config/EZRetrofitConfigTest.java`
-- [ ] T006 [P] [US1] 撰寫新客戶端單元測試，檔案路徑為 `src/test/java/tw/idv/laiis/ezretrofit/client/EZRetrofitClientTest.java`
+- [X] T005 [P] [US1] 撰寫新設定類別單元測試，檔案路徑為 `src/test/java/tw/idv/laiis/ezretrofit/config/EZRetrofitConfigTest.java`
+- [X] T006 [P] [US1] 撰寫新客戶端單元測試，檔案路徑為 `src/test/java/tw/idv/laiis/ezretrofit/client/EZRetrofitClientTest.java`
 
 ### Implementation for User Story 1
 
-- [ ] T007 [P] [US1] 實作全局設定中心 `EZRetrofitConfig`，檔案路徑為 `src/main/java/tw/idv/laiis/ezretrofit/config/EZRetrofitConfig.java`
-- [ ] T008 [P] [US1] 實作 OkHttpClient 與 Retrofit 建置器 `EZRetrofitClient`，檔案路徑為 `src/main/java/tw/idv/laiis/ezretrofit/client/EZRetrofitClient.java`
-- [ ] T009 [P] [US1] 實作請求計數與生命週期管理類別 `EZRetrofitLifecycle`，檔案路徑為 `src/main/java/tw/idv/laiis/ezretrofit/client/EZRetrofitLifecycle.java`
-- [ ] T010 [US1] 重構 `EZRetrofit` 將其設為 `@Deprecated` facade，代理呼叫至前述新類別，檔案路徑為 `src/main/java/tw/idv/laiis/ezretrofit/EZRetrofit.java`
+- [X] T007 [P] [US1] 實作全局設定中心 `EZRetrofitConfig`，檔案路徑為 `src/main/java/tw/idv/laiis/ezretrofit/config/EZRetrofitConfig.java`
+- [X] T008 [P] [US1] 實作 OkHttpClient 與 Retrofit 建置器 `EZRetrofitClient`，檔案路徑為 `src/main/java/tw/idv/laiis/ezretrofit/client/EZRetrofitClient.java`
+- [X] T009 [P] [US1] 實作請求計數與生命週期管理類別 `EZRetrofitLifecycle`，檔案路徑為 `src/main/java/tw/idv/laiis/ezretrofit/client/EZRetrofitLifecycle.java`
+- [X] T010 [US1] 重構 `EZRetrofit` 將其設為 `@Deprecated` facade，代理呼叫至前述新類別，檔案路徑為 `src/main/java/tw/idv/laiis/ezretrofit/EZRetrofit.java`
 
 **Checkpoint**: 使用者故事 1 的拆分已完成，舊 API 均已橋接且所有新舊測試 100% 通過。
 

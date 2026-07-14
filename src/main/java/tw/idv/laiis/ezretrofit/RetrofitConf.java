@@ -137,6 +137,10 @@ public class RetrofitConf {
         return mWebserviceMap.get(webservice);
     }
 
+    public Map<Class<?>, String> getWebserviceMap() {
+        return mWebserviceMap;
+    }
+
     public void setProtocols(List<Protocol> protocolList) {
         mProtocolList.addAll(protocolList);
     }

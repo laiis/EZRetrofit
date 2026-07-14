@@ -12,7 +12,7 @@ import java.util.Map;
 /**
  * Created by laiis on 2017/4/25.
  */
-final class CallManager {
+public final class CallManager {
 
     private static final String TAG = CallManager.class.getName();
 
