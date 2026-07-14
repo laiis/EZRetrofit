@@ -259,8 +259,14 @@ freeline_project_description.json
 .githooks/
 AGENTS.md
 AGENTS_detail.md
-.agents/memory/
+.agents/
+.github/
 .antigravitycli/
+ai_agents_scripts/
+ai_knowledge/
+ai_hooks/
+ai_reports/
+.ai_workflow/
 
 
 # opencode
