@@ -264,6 +264,8 @@ AGENTS_detail.md
 .antigravitycli/
 ai_agents_scripts/
 ai_knowledge/
+scripts/
+workslog/
 ai_hooks/
 ai_reports/
 .ai_workflow/
