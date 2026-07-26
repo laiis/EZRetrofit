@@ -12,7 +12,7 @@ public class EZRetrofitHelper<T> {
 
     private RetrofitConf _RetrofitConf;
     private Retrofit.Builder _Builder;
-    private Map<Class<?>, Retrofit> _RetrofitMap;
+    private final Map<Class<?>, Retrofit> _RetrofitMap = new java.util.concurrent.ConcurrentHashMap<>();
 
     public static <T> EZRetrofitHelper<T> newInstance() {
         return new EZRetrofitHelper<>();
@@ -31,23 +31,18 @@ public class EZRetrofitHelper<T> {
         return this;
     }
 
+    @Deprecated
     public EZRetrofitHelper<T> setRetrofitMap(Map<Class<?>, Retrofit> retrofitMap) {
-        this._RetrofitMap = retrofitMap;
+        if (retrofitMap != null) {
+            this._RetrofitMap.putAll(retrofitMap);
+        }
         return this;
     }
 
     public T webservice(Class<T> clsWebservice) {
-        if (_RetrofitMap.get(clsWebservice) == null) {
-            synchronized (_RetrofitMap) {
-                if (_RetrofitMap.get(clsWebservice) == null) {
-                    Retrofit retrofit = _Builder.baseUrl(_RetrofitConf.getBaseUrl(clsWebservice))
-                            .build();
-                    _RetrofitMap.put(clsWebservice, retrofit);
-                }
-            }
-        }
-
-        Retrofit retrofit = _RetrofitMap.get(clsWebservice);
-        return retrofit.create(clsWebservice);
+        return _RetrofitMap.computeIfAbsent(clsWebservice, k -> {
+            Retrofit retrofit = _Builder.baseUrl(_RetrofitConf.getBaseUrl(k)).build();
+            return retrofit;
+        }).create(clsWebservice);
     }
 }

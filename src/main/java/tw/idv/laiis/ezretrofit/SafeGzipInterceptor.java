@@ -21,6 +21,7 @@ public final class SafeGzipInterceptor implements Interceptor {
             return response;
         }
 
+        // 若 Response 仍包含 Content-Encoding: gzip（表示 OkHttp 未自動解壓），執行安全解壓縮 (F1)
         String contentEncoding = response.header("Content-Encoding");
         if (contentEncoding != null && contentEncoding.equalsIgnoreCase("gzip")) {
             BufferedSource bodySource = body.source();
@@ -45,3 +46,5 @@ public final class SafeGzipInterceptor implements Interceptor {
         return response;
     }
 }
+
+

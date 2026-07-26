@@ -85,7 +85,7 @@ public class SupportAllTlsSocketFactory extends SSLSocketFactory {
                 sslParams.setEndpointIdentificationAlgorithm("HTTPS");
                 sslSocket.setSSLParameters(sslParams);
             } catch (Exception e) {
-                // Ignore if not supported in the running JVM environment
+                tw.idv.laiis.ezretrofit.config.EZRetrofitConfig.getLogger().warn("SupportAllTlsSocketFactory", "Failed to set SSL parameters on socket", e);
             }
         }
         return socket;

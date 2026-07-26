@@ -1,13 +1,11 @@
 package tw.idv.laiis.ezretrofit;
 
-
 import retrofit2.Call;
 import retrofit2.Callback;
 
-import java.util.Collections;
-import java.util.HashMap;
 import java.util.Map;
-
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * Created by laiis on 2017/4/25.
@@ -16,8 +14,8 @@ public final class CallManager {
 
     private static final String TAG = CallManager.class.getName();
 
-    private Map<String, Call> mCallMap;
-    private Map<String, RequestCounter> mCounterMap;
+    private final Map<String, Call> mCallMap;
+    private final Map<String, RequestCounter> mCounterMap;
 
     private static class InnerHelper {
         public static volatile CallManager sCallManager = new CallManager();
@@ -28,67 +26,61 @@ public final class CallManager {
     }
 
     private CallManager() {
-        mCallMap = new java.util.concurrent.ConcurrentHashMap<>();
-        mCounterMap = new java.util.concurrent.ConcurrentHashMap<>();
+        mCallMap = new ConcurrentHashMap<>();
+        mCounterMap = new ConcurrentHashMap<>();
     }
 
     public void enqueue(Call call, EZCallback callback) {
-        synchronized (this) {
+        if (callback != null) {
             String tag = callback.getTag();
             if (tag != null && !tag.isEmpty()) {
-                if (mCallMap.get(tag) == null) {
-                    mCallMap.put(tag, call);
-                    if (!mCounterMap.containsKey(tag)) {
-                        mCounterMap.put(tag, new RequestCounter());
-                    }
-
-                    mCounterMap.get(tag).increase();
+                if (mCallMap.putIfAbsent(tag, call) == null) {
+                    mCounterMap.computeIfAbsent(tag, k -> new RequestCounter()).increase();
                 }
             }
-
-
-            call.enqueue(callback);
-
-            showCallInMap();
         }
+
+        if (call != null) {
+            call.enqueue(callback);
+        }
+
+        showCallInMap();
     }
 
     public void dequeue(String tag) {
-        synchronized (this) {
-
+        if (tag != null) {
             mCallMap.remove(tag);
-
-            if (mCounterMap.containsKey(tag)) {
-                mCounterMap.get(tag).decrease();
-
-                if (mCounterMap.get(tag).isZero()) {
-                    mCounterMap.remove(tag);
-                }
-            }
-
-            showCallInMap();
+            mCounterMap.computeIfPresent(tag, (k, counter) -> {
+                counter.decrease();
+                return counter.isZero() ? null : counter;
+            });
         }
+
+        showCallInMap();
     }
 
     public void cancel(String tag) {
-        synchronized (this) {
-            if (mCallMap.get(tag) != null) {
-                mCallMap.get(tag).cancel();
-                dequeue(tag);
+        if (tag != null) {
+            Call call = mCallMap.remove(tag);
+            if (call != null) {
+                call.cancel();
             }
+            mCounterMap.computeIfPresent(tag, (k, counter) -> {
+                counter.decrease();
+                return counter.isZero() ? null : counter;
+            });
         }
     }
 
     public void cancelAll() {
-        synchronized (this) {
-            for (Call call : mCallMap.values()) {
+        for (Call call : mCallMap.values()) {
+            if (call != null) {
                 call.cancel();
             }
-
-            mCallMap.clear();
-            mCounterMap.clear();
-
         }
+
+        mCallMap.clear();
+        mCounterMap.clear();
     }
 
     private void showCallInMap() {
@@ -104,56 +96,51 @@ public final class CallManager {
     }
 
     public int requestAmount() {
-        synchronized (this) {
-            return mCallMap.size();
-        }
+        return mCallMap.size();
     }
 
     public int requestAmount(String presenterName) {
-        synchronized (this) {
-            if (mCounterMap.get(presenterName) != null) {
-                return mCounterMap.get(presenterName).getReqCount();
+        if (presenterName != null) {
+            RequestCounter counter = mCounterMap.get(presenterName);
+            if (counter != null) {
+                return counter.getReqCount();
             }
-            return 0;
         }
+        return 0;
     }
 
     public boolean isRequestEmpty() {
-        synchronized (this) {
-            showCallInMap();
-            return mCallMap.isEmpty();
-        }
+        showCallInMap();
+        return mCallMap.isEmpty();
     }
 
     public boolean isRequestEmpty(String presenterName) {
-        synchronized (this) {
-            showCallInMap();
-            return !mCounterMap.containsKey(presenterName);
-        }
+        showCallInMap();
+        return !mCounterMap.containsKey(presenterName);
     }
 
     private static final class RequestCounter {
-
-        private int reqCount = 0;
+        private final AtomicInteger reqCount = new AtomicInteger(0);
 
         public void increase() {
-            reqCount++;
+            reqCount.incrementAndGet();
         }
 
         public void decrease() {
-            reqCount--;
+            reqCount.decrementAndGet();
         }
 
         public int getReqCount() {
-            return reqCount;
+            return reqCount.get();
         }
 
         public void zero() {
-            reqCount = 0;
+            reqCount.set(0);
         }
 
         public boolean isZero() {
-            return reqCount == 0;
+            return reqCount.get() <= 0;
         }
     }
 }
+

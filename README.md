@@ -9,14 +9,15 @@ EZRetrofit 是一個基於 [Retrofit2](https://square.github.io/retrofit/) 的 A
 
 ## 功能特色
 
-- **簡易初始化**：透過 `RetrofitConf.Builder` 以鏈式呼叫完成所有 OkHttp / Retrofit 設定
-- **多 Base URL 支援**：可為不同的 Webservice 介面分別設定獨立的 Base URL，並以 `ConcurrentHashMap` 快取 Retrofit 實例
-- **請求生命週期管理**：透過 `CallManager` 以 Tag 追蹤、計數、取消個別或全部請求
-- **統一回呼介面**：`EZCallback` 將成功、失敗（非 2xx）、例外三種情境拆開，減少業務層的判斷邏輯
-- **SSL / TLS 彈性配置**：支援憑證釘選（Certificate Pinning）、自訂 `SSLSocketFactory`、自訂 TrustManager，以及測試用的忽略驗證模式
-- **執行緒安全**：核心靜態欄位使用 `volatile` + `synchronized`；集合欄位採用 `Collections.synchronized*` 或 `ConcurrentHashMap`
-- **ProGuard 混淆整合**：建置流程自動套用 ProGuard，產出經混淆的 JAR
-- **可插拔 Logger**：透過 `EZLogger` 介面自訂日誌輸出，預設輸出至 `System.err`
+- **領域分層與 Fluent API**：全架構重構拆分為 `config` 全局設定中心與 `client` 建置器，提供高彈性的 Fluent API
+- **簡易初始化與模組化配置**：透過 `EZRetrofitConfig` 統一管理 `SslConfig`、`ProxyConfig`、`TimeoutConfig` 與 `InterceptorConfig`
+- **多 Base URL 支援**：可為不同的 Webservice 介面分別設定獨立的 Base URL，並以 `ConcurrentHashMap` 高效快取 Retrofit 實例
+- **請求生命週期管理**：透過 `EZRetrofitLifecycle` 與 `CallManager` 以 Tag 追蹤、計數、取消個別或全部進行中的請求
+- **統一回呼介面**：`EZCallback` 解耦依賴，將成功、失敗（非 2xx）、例外三種情境明確拆開，降低業務邏輯複雜度
+- **SSL / TLS 彈性與安全防護**：支援憑證釘選（Certificate Pinning）、自訂 `SSLSocketFactory`、自訂 TrustManager，以及 `DefaultTestingTrustManager` 執行時期憑證簽章指紋防護
+- **高並發安全與無鎖化**：核心對列與 `CallManager` 移除方法級同步鎖，採用 `ConcurrentHashMap` 原生原子操作，大幅提升高並發效能
+- **向下相容 Facade**：原 `EZRetrofit` 標記為 `@Deprecated` 代理入口，保證既有專案免修改無縫升級
+- **可擴充 Logger**：透過 `EZLogger` 介面自訂日誌輸出（支援 `info`、`debug`、`warn`、`error`），預設輸出至 `System.err`
 
 ---
 
@@ -60,45 +61,67 @@ dependencies {
 
 ## 快速開始
 
-### 1. 初始化
+### 1. 新版 Fluent API 初始化 (推薦)
 
-在 `Application.onCreate()` 或任何合適的初始化點呼叫一次：
+透過 `EZRetrofitConfig` 與 `EZRetrofitClient` 進行強型別、模組化的 Fluent API 配置：
 
 ```java
+// 1. 配置全局與模組端點
+EZRetrofitConfig config = EZRetrofitConfig.getInstance();
+config.registerBaseUrl(ApiService.class, "https://api.example.com/");
+config.setTimeoutConfig(new TimeoutConfig(15L, 30L, 30L));
+
+// 2. 透過 EZRetrofitClient 建立 Service 實例
+EZRetrofitClient client = new EZRetrofitClient(config);
+ApiService api = client.create(ApiService.class);
+```
+
+### 2. 向下相容模式 (Deprecated Facade)
+
+若為既有專案，可繼續使用 `EZRetrofit` 舊有介面（內部將自動橋接至 `EZRetrofitConfig` 與 `EZRetrofitClient`）：
+
+```java
+// 舊版初始化方式 (已標記 @Deprecated)
 RetrofitConf conf = new RetrofitConf.Builder()
         .baseUrls(ApiService.class, "https://api.example.com/")
-        .timeout(30L)                         // 連線／讀取逾時（秒），預設 15
-        .setFollowRedirects(true)
-        .setFollowSslRedirects(true)
+        .timeout(30L)
         .build();
 
 EZRetrofit.initial(conf);
+ApiService api = EZRetrofit.create(ApiService.class);
 ```
 
-### 2. 取得 Webservice 實例
+---
+
+## 請求生命週期與追蹤
+
+全新生命週期管理模組 `EZRetrofitLifecycle` 提供更靈活的請求計數與取消機制：
 
 ```java
-// 方式一：直接取得 Retrofit service 代理
-ApiService api = EZRetrofit.create(ApiService.class);
+EZRetrofitLifecycle lifecycle = EZRetrofitLifecycle.getInstance();
 
-// 方式二：透過 EZRetrofitHelper 鏈式建立（可覆寫部分設定）
-EZRetrofitHelper<ApiService> helper = EZRetrofit.create();
-ApiService api = helper.webservice(ApiService.class);
+// 查詢目前進行中的請求總數
+int total = lifecycle.getActiveCallCount();
 
-// 方式三：傳入獨立 RetrofitConf（適用需要不同設定的場景）
-RetrofitConf anotherConf = new RetrofitConf.Builder()
-        .baseUrls(AnotherService.class, "https://other.example.com/")
-        .timeout(60L)
-        .build();
-EZRetrofitHelper<AnotherService> helper2 = EZRetrofit.create(anotherConf);
+// 查詢特定 Tag 的進行中請求數
+int count = lifecycle.getActiveCallCount("userList");
+
+// 取消特定 Tag 的請求
+lifecycle.cancelCalls("userList");
+
+// 取消所有進行中的請求
+lifecycle.cancelAllCalls();
 ```
 
-### 3. 發送請求（使用 EZCallback）
+---
+
+## 異步請求（使用 EZCallback）
 
 ```java
 Call<List<User>> call = api.getUsers();
 
-EZRetrofit.call(call, new EZCallback<List<User>>("userList") {
+// 傳入 Tag ("userList") 即可啟用請求追蹤與生命週期管理
+call.enqueue(new EZCallback<List<User>>("userList") {
     @Override
     public void success(Call<List<User>> call, Response<List<User>> response) {
         // HTTP 2xx
@@ -119,88 +142,57 @@ EZRetrofit.call(call, new EZCallback<List<User>>("userList") {
 });
 ```
 
-> **Tag**：傳入非空字串可啟用請求追蹤，之後可用 `EZRetrofit.stop("userList")` 取消該請求。
-
-### 4. 請求管理
-
-```java
-// 查詢目前進行中的請求總數
-int total = EZRetrofit.count();
-
-// 查詢特定 Tag 的請求數
-int count = EZRetrofit.count("userList");
-
-// 取消特定 Tag 的請求
-EZRetrofit.stop("userList");
-
-// 取消所有進行中的請求
-EZRetrofit.stopAll();
-```
-
 ---
 
-## SSL / TLS 進階設定
+## SSL / TLS 與安全防護
 
-### 憑證釘選（Certificate Pinning）
-
-```java
-CertificatePinner pinner = new CertificatePinner.Builder()
-        .add("api.example.com", "sha256/AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=")
-        .build();
-
-RetrofitConf conf = new RetrofitConf.Builder()
-        .baseUrls(ApiService.class, "https://api.example.com/")
-        .setCertificatePinner(pinner)
-        .setUseCertificatePinning(true)
-        .build();
-```
-
-### 自訂 SSLSocketFactory（含 TLS 版本限制）
+### 憑證與 TrustManager 配置 (`SslConfig`)
 
 ```java
-RetrofitConf.SSLFactoryManager sslManager =
-        new RetrofitConf.SSLFactoryManager.Builder()
-                .setProtocol(TlsVersion.TLS_1_2)
-                .setSupportProtocols(new String[]{"TLSv1.2", "TLSv1.3"})
-                .setIgnoreVerify(false)          // 正式環境請設 false
-                .build();
-
-RetrofitConf conf = new RetrofitConf.Builder()
-        .baseUrls(ApiService.class, "https://api.example.com/")
-        .setSSLFactoryManager(sslManager)
-        .setUseSSLFactoryManager(true)
-        .build();
-```
-
-> **警告**：`setIgnoreVerify(true)` 僅供開發／測試環境使用，**切勿**用於正式環境。
-
----
-
-## Cookie 管理
-
-EZRetrofit 提供內建的持久化 Cookie 實作，適用於 Android 環境：
-
-```java
-// PersistentCookieStore 需搭配 Android Context 使用
-CookieJar cookieJar = new CookieJarManager(
-        new PersistentCookieStore(context)
+SslConfig sslConfig = new SslConfig(
+        mySSLSocketFactory,
+        myX509TrustManager,
+        myHostnameVerifier
 );
 
-RetrofitConf conf = new RetrofitConf.Builder()
-        .baseUrls(ApiService.class, "https://api.example.com/")
-        .setCookieJar(cookieJar)
-        .build();
+config.setSslConfig(sslConfig);
 ```
+
+### 測試環境防護 (`DefaultTestingTrustManager`)
+
+在開發與測試環境使用 `DefaultTestingTrustManager` 時，系統自動針對產出憑證進行 SHA-256 簽章指紋校驗，防止偽造憑證攻擊：
+
+```java
+DefaultTestingTrustManager trustManager = DefaultTestingTrustManager.getInstance();
+// 若指紋匹配成功始通過驗證，否則拋出 SecurityException
+```
+
+> **警告**：測試 TrustManager 僅供開發與測試環境使用，**切勿**用於正式生產環境。
 
 ---
 
 ## 自訂 Logger
 
 ```java
-EZRetrofit.setLogger(new EZLogger() {
+EZRetrofitConfig.getInstance().setLogger(new EZLogger() {
+    @Override
+    public void info(String tag, String message) {
+        Log.i(tag, message);
+    }
+
+    @Override
+    public void debug(String tag, String message) {
+        Log.d(tag, message);
+    }
+
     @Override
     public void warn(String tag, String message, Throwable t) {
-        Log.w(tag, message, t); // 使用 Android Log 輸出
+        Log.w(tag, message, t);
+    }
+
+    @Override
+    public void error(String tag, String message, Throwable t) {
+        Log.e(tag, message, t);
     }
 });
 ```
@@ -211,28 +203,32 @@ EZRetrofit.setLogger(new EZLogger() {
 
 ```
 src/main/java/tw/idv/laiis/ezretrofit/
-├── EZRetrofit.java              # 公開靜態入口，初始化與請求發送
-├── EZRetrofitHelper.java        # Retrofit 實例建立與快取（Double-Checked Locking）
-├── RetrofitConf.java            # 所有 OkHttp / Retrofit 設定的 Builder 類別
-├── CallManager.java             # 請求追蹤、計數、取消（Singleton + ConcurrentHashMap）
-├── EZCallback.java              # 統一回呼抽象類別（success / fail / exception）
-├── EZLogger.java                # 日誌介面
-├── LibConfig.java               # 建置時期常數（DEBUG flag 等）
-├── ParamCreator.java            # 請求參數工具
-├── SupportAllTlsSocketFactory.java # 自訂 SSLSocketFactory，強制指定 TLS 協定
-├── cookies/
-│   ├── CookieJarManager.java    # OkHttp CookieJar 實作
-│   ├── CookieStoreRepo.java     # Cookie 儲存庫介面
-│   ├── PersistentCookieStore.java  # Android SharedPreferences 持久化實作
-│   └── SerializableHttpCookie.java # 可序列化的 HttpCookie 包裝
-└── managers/
-    ├── DefaultTestingTrustManager.java  # 測試用：接受所有憑證（勿用於正式環境）
-    └── EZRetrofitTrustManager.java      # 自訂 X509TrustManager，支援憑證釘選
+├── EZRetrofit.java                 # @Deprecated Facade 代理入口（向下相容）
+├── EZRetrofitHelper.java           # 核心與快取介面輔助類別
+├── RetrofitConf.java               # 舊版設定 Builder (轉導至 EZRetrofitConfig)
+├── CallManager.java                # 請求追蹤與並發取消（無鎖 ConcurrentHashMap 實作）
+├── EZCallback.java                 # 統一解耦回呼抽象類別 (success / fail / exception)
+├── EZLogger.java                   # 多層級日誌介面 (info / debug / warn / error)
+├── LibConfig.java                  # 建置時期常數
+├── ParamCreator.java               # 請求參數工具
+├── SafeGzipInterceptor.java        # 安全解壓攔截器
+├── SupportAllTlsSocketFactory.java # SSLSocketFactory 安全包裝
+├── config/                         # [NEW] 領域與全局設定中心
+│   ├── EZRetrofitConfig.java       # 全局/模組設定管理
+│   ├── InterceptorConfig.java      # 攔截器配置
+│   ├── ProxyConfig.java            # 代理伺服器配置
+│   ├── SslConfig.java              # SSL 配置
+│   └── TimeoutConfig.java          # 逾時時間配置
+├── client/                         # [NEW] 客戶端建置與生命週期
+│   ├── EZRetrofitClient.java       # Fluent API OkHttpClient 與 Retrofit 建置器
+│   └── EZRetrofitLifecycle.java    # 請求計數與生命週期管理
+├── cookies/                        # Persistent Cookie 管理
+└── managers/                       # TrustManager 實作與安全指紋驗證
 ```
 
 ---
 
-## 建置
+## 建置與測試
 
 需求：
 - JDK 8+（執行相容性）；建置環境建議 JDK 21
@@ -240,10 +236,10 @@ src/main/java/tw/idv/laiis/ezretrofit/
 
 ```bash
 # Windows
-.\gradlew.bat jar
+.\gradlew.bat test jar
 
 # Linux / macOS
-./gradlew jar
+./gradlew test jar
 ```
 
 建置產物位於 `build/libs/EZRetrofit-0.2.0.jar`（已套用 ProGuard 混淆）。
@@ -252,4 +248,4 @@ src/main/java/tw/idv/laiis/ezretrofit/
 
 ## 授權
 
-本專案採用 [Apache License 2.0](LICENSE) 授權。
+本專案採用 [Apache License 2.0](LICENSE) 授權。

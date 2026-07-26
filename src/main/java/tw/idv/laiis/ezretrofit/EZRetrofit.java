@@ -13,7 +13,7 @@ import java.util.*;
  * @deprecated Use {@link EZRetrofitConfig}, {@link EZRetrofitClient}, and {@link EZRetrofitLifecycle} instead.
  */
 @Deprecated
-public class EZRetrofit<T> {
+public final class EZRetrofit {
 
     private static final Map<Class<?>, Retrofit> sRetrofitMap = new java.util.concurrent.ConcurrentHashMap<>();
 

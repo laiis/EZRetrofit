@@ -20,6 +20,29 @@ public class EZRetrofitTest {
     }
 
     @Test
+    public void testFacadeLifecycleMethods() {
+        assertEquals(0, EZRetrofit.count());
+        assertEquals(0, EZRetrofit.count("tag1"));
+
+        assertDoesNotThrow(() -> EZRetrofit.stop("tag1"));
+        assertDoesNotThrow(EZRetrofit::stopAll);
+
+        assertDoesNotThrow(() -> EZRetrofit.setLogger(new EZLogger() {
+            @Override
+            public void warn(String tag, String message, Throwable t) {}
+        }));
+
+        EZRetrofitHelper<TestServiceA> helper = EZRetrofit.create();
+        assertNotNull(helper);
+
+        RetrofitConf conf2 = new RetrofitConf.Builder()
+                .baseUrls(TestServiceA.class, "https://service-a2.com/")
+                .build();
+        EZRetrofitHelper<TestServiceA> helper2 = EZRetrofit.create(conf2);
+        assertNotNull(helper2);
+    }
+
+    @Test
     public void testConcurrentCreate() throws InterruptedException, ExecutionException {
         int threadCount = 10;
         int iterations = 1000;

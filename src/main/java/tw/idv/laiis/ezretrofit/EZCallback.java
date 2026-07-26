@@ -11,21 +11,36 @@ import retrofit2.Response;
 public abstract class EZCallback<T> implements Callback<T> {
 
     private String mTag;
+    private final Runnable mDequeueHandler;
 
     public EZCallback() {
+        this(null, null);
     }
 
     public EZCallback(String tag) {
+        this(tag, null);
+    }
+
+    public EZCallback(String tag, Runnable dequeueHandler) {
         this.mTag = tag;
+        this.mDequeueHandler = dequeueHandler;
     }
 
     public String getTag() {
         return mTag;
     }
 
+    protected void handleDequeue() {
+        if (mDequeueHandler != null) {
+            mDequeueHandler.run();
+        } else {
+            CallManager.newInstance().dequeue(mTag);
+        }
+    }
+
     @Override
     public final void onResponse(Call<T> call, Response<T> response) {
-        CallManager.newInstance().dequeue(mTag);
+        handleDequeue();
         if (!response.isSuccessful()) {
             fail(call, response);
             return;
@@ -36,7 +51,7 @@ public abstract class EZCallback<T> implements Callback<T> {
 
     @Override
     public final void onFailure(Call<T> call, Throwable t) {
-        CallManager.newInstance().dequeue(mTag);
+        handleDequeue();
         exception(call, t);
     }
 
@@ -46,3 +61,4 @@ public abstract class EZCallback<T> implements Callback<T> {
 
     public abstract void exception(Call<T> call, Throwable t);
 }
+

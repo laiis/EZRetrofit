@@ -73,4 +73,24 @@ public class DefaultTestingTrustManagerTest {
             // 反射失敗在現代 JDK 下為正常，因 JVM 限制
         }
     }
+
+    @Test
+    public void testSha256FingerprintValidation() {
+        if (!BuildConfig.DEBUG) {
+            return; // 僅在 DEBUG 模式測試指紋邏輯
+        }
+
+        DefaultTestingTrustManager trustManagerWithFingerprint = new DefaultTestingTrustManager("AA:BB:CC:DD");
+        X509Certificate[] emptyChain = new X509Certificate[0];
+
+        // 預期指紋設定但證書鏈為空時應拋出 SecurityException
+        assertThrows(SecurityException.class, () -> {
+            trustManagerWithFingerprint.checkServerTrusted(emptyChain, "RSA");
+        });
+
+        assertThrows(SecurityException.class, () -> {
+            trustManagerWithFingerprint.checkClientTrusted(emptyChain, "RSA");
+        });
+    }
 }
+

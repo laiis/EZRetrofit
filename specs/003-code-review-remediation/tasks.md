@@ -66,14 +66,14 @@
 
 ### Tests for User Story 2
 
-- [ ] T011 [P] [US2] 撰寫並發壓力測試，驗證 `CallManager` 效能與安全性，檔案路徑為 `src/test/java/tw/idv/laiis/ezretrofit/CallManagerConcurrencyTest.java`
-- [ ] T012 [P] [US2] 撰寫憑證簽章驗證單元測試，驗證異常觸發，檔案路徑為 `src/test/java/tw/idv/laiis/ezretrofit/managers/DefaultTestingTrustManagerTest.java`
+- [X] T011 [P] [US2] 撰寫並發壓力測試，驗證 `CallManager` 效能與安全性，檔案路徑為 `src/test/java/tw/idv/laiis/ezretrofit/CallManagerConcurrencyTest.java`
+- [X] T012 [P] [US2] 撰寫憑證簽章驗證單元測試，驗證異常觸發，檔案路徑為 `src/test/java/tw/idv/laiis/ezretrofit/managers/DefaultTestingTrustManagerTest.java`
 
 ### Implementation for User Story 2
 
-- [ ] T013 [US2] 重構 `CallManager` 移除方法級同步鎖，改以 `ConcurrentHashMap` 原生原子操作實作並發，檔案路徑為 `src/main/java/tw/idv/laiis/ezretrofit/CallManager.java`
-- [ ] T014 [US2] 重構 `SupportAllTlsSocketFactory` 補足例外處理，將其輸出至 `EZLogger.warn`，檔案路徑為 `src/main/java/tw/idv/laiis/ezretrofit/managers/SupportAllTlsSocketFactory.java`
-- [ ] T015 [US2] 實作 `DefaultTestingTrustManager` 執行時期簽章憑證 SHA-256 雜湊驗證與防禦，檔案路徑為 `src/main/java/tw/idv/laiis/ezretrofit/managers/DefaultTestingTrustManager.java`
+- [X] T013 [US2] 重構 `CallManager` 移除方法級同步鎖，改以 `ConcurrentHashMap` 原生原子操作實作並發，檔案路徑為 `src/main/java/tw/idv/laiis/ezretrofit/CallManager.java`
+- [X] T014 [US2] 重構 `SupportAllTlsSocketFactory` 補足例外處理，將其輸出至 `EZLogger.warn`，檔案路徑為 `src/main/java/tw/idv/laiis/ezretrofit/SupportAllTlsSocketFactory.java`
+- [X] T015 [US2] 實作 `DefaultTestingTrustManager` 執行時期簽章憑證 SHA-256 雜湊驗證與防禦，檔案路徑為 `src/main/java/tw/idv/laiis/ezretrofit/managers/DefaultTestingTrustManager.java`
 
 **Checkpoint**: 使用者故事 2 實作完成，高並發效能表現達標，安全漏洞已獲防禦且測試通過。
 
@@ -87,15 +87,15 @@
 
 ### Tests for User Story 3
 
-- [ ] T016 [P] [US3] 撰寫 `EZCallback` 與 `EZRetrofitHelper` 的快取隔離測試，檔案路徑為 `src/test/java/tw/idv/laiis/ezretrofit/EZCallbackTest.java`
-- [ ] T017 [P] [US3] 撰寫 `SafeGzipInterceptor` 雙重解壓跳過測試，檔案路徑為 `src/test/java/tw/idv/laiis/ezretrofit/SafeGzipInterceptorTest.java`
+- [X] T016 [P] [US3] 撰寫 `EZCallback` 與 `EZRetrofitHelper` 的快取隔離測試，檔案路徑為 `src/test/java/tw/idv/laiis/ezretrofit/EZCallbackTest.java`
+- [X] T017 [P] [US3] 撰寫 `SafeGzipInterceptor` 雙重解壓跳過測試，檔案路徑為 `src/test/java/tw/idv/laiis/ezretrofit/SafeGzipInterceptorTest.java`
 
 ### Implementation for User Story 3
 
-- [ ] T018 [US3] 重構 `EZRetrofit` 去除類別泛型 `<T>`，改為 `public final class`，泛型移至方法級，檔案路徑為 `src/main/java/tw/idv/laiis/ezretrofit/EZRetrofit.java`
-- [ ] T019 [US3] 重構 `EZRetrofitHelper`，移除快取共享狀態 `_RetrofitMap`，改由配置統一管理，檔案路徑為 `src/main/java/tw/idv/laiis/ezretrofit/EZRetrofitHelper.java`
-- [ ] T020 [US3] 解耦 `EZCallback` 與 `CallManager` 單例之依賴，改為透過回呼介面注入處理，檔案路徑為 `src/main/java/tw/idv/laiis/ezretrofit/EZCallback.java`
-- [ ] T021 [US3] 重構 `SafeGzipInterceptor` 判斷 Request 中是否不含 `Accept-Encoding` 標頭以跳過手動解壓，檔案路徑為 `src/main/java/tw/idv/laiis/ezretrofit/SafeGzipInterceptor.java`
+- [X] T018 [US3] 重構 `EZRetrofit` 去除類別泛型 `<T>`，改為 `public final class`，泛型移至方法級，檔案路徑為 `src/main/java/tw/idv/laiis/ezretrofit/EZRetrofit.java`
+- [X] T019 [US3] 重構 `EZRetrofitHelper`，移除快取共享狀態 `_RetrofitMap`，改由配置統一管理，檔案路徑為 `src/main/java/tw/idv/laiis/ezretrofit/EZRetrofitHelper.java`
+- [X] T020 [US3] 解耦 `EZCallback` 與 `CallManager` 單例之依賴，改為透過回呼介面注入處理，檔案路徑為 `src/main/java/tw/idv/laiis/ezretrofit/EZCallback.java`
+- [X] T021 [US3] 重構 `SafeGzipInterceptor` 判斷 Request 中是否不含 `Accept-Encoding` 標頭以跳過手動解壓，檔案路徑為 `src/main/java/tw/idv/laiis/ezretrofit/SafeGzipInterceptor.java`
 
 **Checkpoint**: 使用者故事 3 實作完成，解耦與設計清理均已通過單元測試。
 
@@ -105,9 +105,9 @@
 
 **Purpose**: 文件與程式碼品質精雕
 
-- [ ] T022 [P] 更新 README 描述新版子套件 Fluent API 與生命週期管理用法，檔案路徑為 `README.md`
-- [ ] T023 執行靜態分析工具 checkstyle/PMD 確保無 God Class 警告且類別職責度良好
-- [ ] T024 執行完整單元測試套件，確保所有 24 項任務皆通過測試，且整體測試行覆蓋率至少達 80%
+- [X] T022 [P] 更新 README 描述新版子套件 Fluent API 與生命週期管理用法，檔案路徑為 `README.md`
+- [X] T023 執行靜態分析工具 checkstyle/PMD 確保無 God Class 警告且類別職責度良好
+- [X] T024 執行完整單元測試套件，確保所有 24 項任務皆通過測試，且整體測試行覆蓋率至少達 80%
 
 ---
 
